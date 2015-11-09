@@ -1,0 +1,151 @@
+buildscript {
+    repositories {
+        maven {
+            name = 'plugins'
+            url = 'https://plugins.gradle.org/m2'
+        }
+        jcenter()
+        maven {
+            name = 'sponge'
+            url = 'http://repo.spongepowered.org/maven'
+        }
+    }
+
+    dependencies {
+        classpath('nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0') {
+            exclude module: 'guava'
+        }
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.2'
+    }
+}
+
+// Modified minecraft.gradle
+ext.api = project('SpongeAPI')
+
+apply from: api.file('gradle/sponge.gradle')
+
+evaluationDependsOn api.path
+
+compileJava {
+    options.compilerArgs += [
+            '-Xlint:-processing'
+    ]
+}
+
+jar {
+    manifest {
+        attributes(
+                'Specification-Name': api.name,
+                'Specification-Version': api.version,
+                'Specification-Vendor': api.url,
+                'Main-Class': 'org.spongepowered.lantern.Main'
+        )
+    }
+}
+
+checkstyle {
+    configProperties['suppressions'] = file('checkstyle-suppressions.xml')
+}
+
+license {
+    ext.name = 'Sponge'
+}
+
+// Modified implementation.gradle
+
+ext.apiVersion = (api.version - '-SNAPSHOT') + '-DEV'
+
+afterEvaluate {
+    manifest {
+        attributes(
+                'Implementation-Version': "$version+$ciSystem-b${buildNumber}.git-$commit"
+        )
+    }
+}
+
+apply plugin: 'com.github.johnrengelman.shadow'
+
+shadowJar {
+    dependsOn jar
+
+    classifier = ''
+
+    dependencies {
+        // SpongeAPI and event generation
+        include project(api.path)
+        include dependency('org.spongepowered:event-gen-core')
+
+        // Dependencies from vanilla MC
+        include dependency('com.google.guava:guava')
+        include dependency('com.google.gson:gson')
+        include dependency('org.apache.commons:commons-lang3')
+        include dependency('com.google.code.findbugs:jsr305')
+        include dependency('org.ow2.asm:asm')
+
+
+        // Include all other dependencies
+        include dependency('org.slf4j:slf4j-api')
+        include dependency('org.apache.logging.log4j:log4j-slf4j-impl')
+
+        include dependency('com.google.inject:guice')
+        include dependency('javax.inject:javax.inject')
+        include dependency('aopalliance:aopalliance')
+
+        include dependency('com.flowpowered:flow-math')
+        include dependency('com.flowpowered:flow-noise')
+
+        include dependency('ninja.leaping.configurate:configurate-core')
+        include dependency('ninja.leaping.configurate:configurate-hocon')
+        include dependency('ninja.leaping.configurate:configurate-gson')
+        include dependency('ninja.leaping.configurate:configurate-yaml')
+        include dependency('com.typesafe:config')
+
+        include dependency('org.yaml:snakeyaml')
+
+        include dependency('com.zaxxer:HikariCP')
+        include dependency('org.javassist:javassist')
+
+        include dependency('org.mariadb.jdbc:mariadb-java-client')
+        include dependency('com.h2database:h2')
+        include dependency('org.xerial:sqlite-jdbc')
+    }
+
+    // We include multiple JDBC drivers, so we need to merge the service file to enable them all
+    mergeServiceFiles()
+
+    // Prevent other dependencies replacing our license file
+    exclude 'LICENSE', 'NOTICE'
+}
+
+task sourceJar(type: Jar, dependsOn: classes) {
+    from api.sourceSets.main.allSource
+    from sourceSets.main.allSource
+}
+
+javadocJar {
+    from api.tasks.javadoc.destinationDir
+    from javadoc.destinationDir
+}
+
+// Based on SpongeCommon.gradle
+
+dependencies {
+    compile api
+    compile 'org.apache.logging.log4j:log4j-slf4j-impl:2.0-beta9'
+
+    compile 'com.zaxxer:HikariCP:2.4.1'
+
+    runtime 'org.mariadb.jdbc:mariadb-java-client:1.2.3'
+    runtime 'com.h2database:h2:1.4.190'
+    runtime 'org.xerial:sqlite-jdbc:3.8.11.2'
+}
+
+// Based on SpongeForge.gradle
+
+ext.minecraftVersion = '1.8'
+
+version = "$minecraftVersion-$apiVersion-$buildNumber"
+
+artifacts {
+    archives shadowJar
+}
