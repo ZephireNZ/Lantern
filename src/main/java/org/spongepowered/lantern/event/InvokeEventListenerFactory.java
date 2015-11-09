@@ -22,11 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.lantern;
+package org.spongepowered.lantern.event;
 
-public class Main {
+import static com.google.common.base.Preconditions.checkNotNull;
 
-    public static void main(String[] args) {
+import org.spongepowered.api.event.Event;
+
+import java.lang.reflect.Method;
+
+public final class InvokeEventListenerFactory implements AnnotatedEventListener.Factory {
+
+    @Override
+    public AnnotatedEventListener create(Object handle, Method method) throws Exception {
+        return new InvokeEventHandler(handle, method);
+    }
+
+    private static class InvokeEventHandler extends AnnotatedEventListener {
+
+        private final Method method;
+
+        private InvokeEventHandler(Object handle, Method method) {
+            super(handle);
+            this.method = checkNotNull(method, "method");
+        }
+
+        @Override
+        public void handle(Event event) throws Exception {
+            this.method.invoke(this.handle, event);
+        }
 
     }
 

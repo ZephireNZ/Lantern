@@ -22,4 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.lantern;
+package org.spongepowered.lantern.launch;
+
+import com.google.inject.Injector;
+
+public class LanternMain {
+
+    public static void main(String[] args) {
+
+    }
+}

@@ -22,4 +22,55 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.lantern;
+package org.spongepowered.lantern.guice;
+
+import com.google.common.base.Objects;
+import org.spongepowered.api.service.config.ConfigDir;
+
+import java.lang.annotation.Annotation;
+
+// This is strange, but required for Guice and annotations with values.
+public class ConfigDirAnnotation implements ConfigDir {
+
+    private final boolean shared;
+
+    public ConfigDirAnnotation(boolean shared) {
+        this.shared = shared;
+    }
+
+    @Override
+    public boolean sharedRoot() {
+        return this.shared;
+    }
+
+    @Override
+    public Class<? extends Annotation> annotationType() {
+        return ConfigDir.class;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ConfigDir)) {
+            return false;
+        }
+
+        ConfigDir that = (ConfigDir) o;
+        return sharedRoot() == that.sharedRoot();
+    }
+
+    @Override
+    public int hashCode() {
+        return (127 * "sharedRoot".hashCode()) ^ Boolean.valueOf(sharedRoot()).hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper('@' + getClass().getName())
+                .add("shared", this.shared)
+                .toString();
+    }
+
+}

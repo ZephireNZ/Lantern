@@ -22,4 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.lantern;
+package org.spongepowered.lantern.event;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import org.spongepowered.api.event.Event;
+
+import java.lang.reflect.Method;
+
+public abstract class AnnotatedEventListener implements LanternEventListener<Event> {
+
+    protected final Object handle;
+
+    protected AnnotatedEventListener(Object handle) {
+        this.handle = checkNotNull(handle, "handle");
+    }
+
+    @Override
+    public final Object getHandle() {
+        return this.handle;
+    }
+
+    interface Factory {
+
+        AnnotatedEventListener create(Object handle, Method method) throws Exception;
+
+    }
+
+}

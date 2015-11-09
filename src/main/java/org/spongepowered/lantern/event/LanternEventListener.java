@@ -22,4 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.lantern;
+package org.spongepowered.lantern.event;
+
+import org.spongepowered.api.event.Event;
+import org.spongepowered.api.event.EventListener;
+
+public interface LanternEventListener<T extends Event> extends EventListener<T> {
+
+    Object getHandle();
+
+}

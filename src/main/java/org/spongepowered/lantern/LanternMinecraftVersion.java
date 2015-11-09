@@ -22,4 +22,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.lantern;
+package org.spongepowered.lantern;
+
+import org.spongepowered.api.MinecraftVersion;
+
+public class LanternMinecraftVersion implements MinecraftVersion {
+
+    private final String name;
+    private final int protocol;
+
+    public LanternMinecraftVersion(String name, int protocol) {
+        this.name = name;
+        this.protocol = protocol;
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
+    }
+
+    @Override
+    public boolean isLegacy() {
+        return false;
+    }
+
+    public int getProtocol() {
+        return this.protocol;
+    }
+
+    @Override
+    public int compareTo(MinecraftVersion o) {
+        if (this.equals(o)) {
+            return 0;
+        } else if (o.isLegacy()) {
+            return 1;
+        } else {
+            return this.getProtocol() - ((LanternMinecraftVersion) o).getProtocol();
+        }
+    }
+}
