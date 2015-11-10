@@ -27,8 +27,6 @@ public class LanternTweaker implements ITweaker {
 
     @Override
     public void acceptOptions(List<String> args, File gameDir, File assetsDir, String profile) {
-        new ConsoleManager();
-
         if (args != null && !args.isEmpty()) {
             this.args = args.toArray(new String[args.size()]);
         }
