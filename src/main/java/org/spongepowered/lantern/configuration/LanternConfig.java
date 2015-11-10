@@ -16,13 +16,10 @@ import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.logging.log4j.LogManager;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.lantern.Sponge;
 import org.spongepowered.lantern.util.IpSet;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.nio.file.Files;
@@ -218,13 +215,80 @@ public class LanternConfig<T extends LanternConfig.ConfigBase> {
         private CommandsCategory commands = new CommandsCategory();
 
         @Setting(value = "modules")
-        private ModuleCategory mixins = new ModuleCategory();
+        private ModuleCategory modules = new ModuleCategory();
 
         @Setting("ip-sets")
         private Map<String, List<IpSet>> ipSets = new HashMap<>();
 
         @Setting(value = MODULE_BUNGEECORD)
         private BungeeCordCategory bungeeCord = new BungeeCordCategory();
+
+        @Setting("max-height")
+        private int maxHeight = 256;
+
+        @Setting("max-tick-time")
+        private int maxTickTime = 60000;
+
+        @Setting
+        private String motd = "A Minecraft Server";
+
+        @Setting("online-mode")
+        private boolean onlineMode = true;
+
+        //TODO: Remove?
+        @Setting("op-permission-level")
+        private int opPermissionLevel = 4;
+
+        @Setting("player-idle-timeout")
+        private int playerIdleTimeout = 0;
+
+        @Setting("network-compression-threshold")
+        private int networkCompressionThreshold = 256;
+
+        @Setting
+        private QueryCategory query = new QueryCategory();
+
+        @Setting
+        private RconCategory rcon = new RconCategory();
+
+        @Setting
+        private ResourcepackCategory resourcepack = new ResourcepackCategory();
+
+        @Setting("server-ip")
+        private String serverIp = "";
+
+        @Setting("server-port")
+        private int serverPort = 25565;
+
+        @Setting("white-list")
+        private boolean whitelist = false;
+
+        @Setting("allow-flight")
+        private boolean allowFlight = false;
+
+        @Setting("allow-nether")
+        private boolean allowNether = true;
+
+        @Setting("allow-end")
+        private boolean allowEnd = true;
+
+        @Setting("announce-player-achievements")
+        private boolean announceAchievements = true;
+
+        @Setting("force-gamemode")
+        private boolean forceGamemode = false;
+
+        @Setting
+        private String gamemode = "SURVIVAL";
+
+        @Setting("level-name")
+        private String levelName = "world";
+
+        @Setting("level-seed")
+        private String levelSeed = "";
+
+        @Setting("level-type")
+        private String levelType = "DEFAULT";
 
         public BungeeCordCategory getBungeeCord() {
             return this.bungeeCord;
@@ -239,7 +303,7 @@ public class LanternConfig<T extends LanternConfig.ConfigBase> {
         }
 
         public ModuleCategory getModules() {
-            return this.mixins;
+            return this.modules;
         }
 
         public Map<String, Predicate<InetAddress>> getIpSets() {
@@ -254,6 +318,94 @@ public class LanternConfig<T extends LanternConfig.ConfigBase> {
 
         public Predicate<InetAddress> getIpSet(String name) {
             return this.ipSets.containsKey(name) ? Predicates.and(this.ipSets.get(name)) : null;
+        }
+
+        public int getMaxHeight() {
+            return maxHeight;
+        }
+
+        public int getMaxTickTime() {
+            return maxTickTime;
+        }
+
+        public String getMotd() {
+            return motd;
+        }
+
+        public boolean isOnlineMode() {
+            return onlineMode;
+        }
+
+        public int getOpPermissionLevel() {
+            return opPermissionLevel;
+        }
+
+        public int getPlayerIdleTimeout() {
+            return playerIdleTimeout;
+        }
+
+        public int getNetworkCompressionThreshold() {
+            return networkCompressionThreshold;
+        }
+
+        public QueryCategory getQuery() {
+            return query;
+        }
+
+        public RconCategory getRcon() {
+            return rcon;
+        }
+
+        public ResourcepackCategory getResourcepack() {
+            return resourcepack;
+        }
+
+        public String getServerIp() {
+            return serverIp;
+        }
+
+        public int getServerPort() {
+            return serverPort;
+        }
+
+        public boolean isWhitelist() {
+            return whitelist;
+        }
+
+        public boolean isAllowFlight() {
+            return allowFlight;
+        }
+
+        public boolean isAllowNether() {
+            return allowNether;
+        }
+
+        public boolean isAllowEnd() {
+            return allowEnd;
+        }
+
+        public boolean isAnnounceAchievements() {
+            return announceAchievements;
+        }
+
+        public boolean isForceGamemode() {
+            return forceGamemode;
+        }
+
+        public String getGamemode() {
+            return gamemode;
+        }
+
+        public String getLevelName() {
+            return levelName;
+        }
+
+        public String getLevelSeed() {
+            return levelSeed;
+        }
+
+        public String getLevelType() {
+            return levelType;
         }
     }
 
@@ -462,6 +614,15 @@ public class LanternConfig<T extends LanternConfig.ConfigBase> {
                 comment = "Number of ticks before a painting is respawned on clients when their art is changed")
         private int paintingRespawnDelaly = 2;
 
+        @Setting("spawn-animals")
+        private boolean spawnAnimals = true;
+
+        @Setting("spawn-monsters")
+        private boolean spawnMonsters = true;
+
+        @Setting("spawn-npcs")
+        private boolean spawnNpcs = true;
+
         public int getMaxBoundingBoxSize() {
             return this.maxBoundingBoxSize;
         }
@@ -516,6 +677,18 @@ public class LanternConfig<T extends LanternConfig.ConfigBase> {
 
         public void setPaintingRespawnDelaly(int paintingRespawnDelaly) {
             this.paintingRespawnDelaly = Math.min(paintingRespawnDelaly, 1);
+        }
+
+        public boolean isSpawnAnimals() {
+            return spawnAnimals;
+        }
+
+        public boolean isSpawnMonsters() {
+            return spawnMonsters;
+        }
+
+        public boolean isSpawnNpcs() {
+            return spawnNpcs;
         }
     }
 
@@ -774,8 +947,36 @@ public class LanternConfig<T extends LanternConfig.ConfigBase> {
 
         @Setting(value = WORLD_INFINITE_WATER_SOURCE, comment = "Vanilla water source behavior - is infinite")
         private boolean infiniteWaterSource = false;
+
         @Setting(value = WORLD_FLOWING_LAVA_DECAY, comment = "Lava behaves like vanilla water when source block is removed")
         private boolean flowingLavaDecay = false;
+
+        @Setting
+        private String difficulty = "EASY";
+
+        @Setting("enable-command-blocks")
+        private boolean enableCommandBlocks = false;
+
+        @Setting
+        private boolean hardcore = false;
+
+        @Setting("generate-structures")
+        private boolean generateStructures = false;
+
+        @Setting("generator-settings")
+        private String generatorSettings = "";
+
+        @Setting("max-world-size")
+        private int maxWorldSize = 29999984;
+
+        @Setting
+        private boolean pvp = true;
+
+        @Setting("spawn-protection")
+        private int spawnProtection = 16;
+
+        @Setting("view-distance")
+        private int viewDistance = 10;
 
         public boolean hasInfiniteWaterSource() {
             return this.infiniteWaterSource;
@@ -791,6 +992,42 @@ public class LanternConfig<T extends LanternConfig.ConfigBase> {
 
         public void setFlowingLavaDecay(boolean flowingLavaDecay) {
             this.flowingLavaDecay = flowingLavaDecay;
+        }
+
+        public String getDifficulty() {
+            return difficulty;
+        }
+
+        public boolean isEnableCommandBlocks() {
+            return enableCommandBlocks;
+        }
+
+        public boolean isHardcore() {
+            return hardcore;
+        }
+
+        public boolean isGenerateStructures() {
+            return generateStructures;
+        }
+
+        public String getGeneratorSettings() {
+            return generatorSettings;
+        }
+
+        public int getMaxWorldSize() {
+            return maxWorldSize;
+        }
+
+        public boolean isPvp() {
+            return pvp;
+        }
+
+        public int getSpawnProtection() {
+            return spawnProtection;
+        }
+
+        public int getViewDistance() {
+            return viewDistance;
         }
     }
 
@@ -847,6 +1084,67 @@ public class LanternConfig<T extends LanternConfig.ConfigBase> {
             this.historyLength = historyLength;
         }
 
+    }
+
+    @ConfigSerializable
+    public static class QueryCategory extends Category {
+
+        @Setting
+        private boolean enabled = false;
+
+        @Setting
+        private int port = 25565;
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public int getPort() {
+            return port;
+        }
+    }
+
+    @ConfigSerializable
+    public static class RconCategory extends Category {
+
+        @Setting
+        private boolean enabled = false;
+
+        @Setting
+        private int port = 25575;
+
+        @Setting
+        private String password = "";
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public int getPort() {
+            return port;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+    }
+
+    @ConfigSerializable
+    public static class ResourcepackCategory extends Category {
+
+        @Setting
+        private String uri = "";
+
+        @Setting
+        private String hash = "";
+
+        public String getUri() {
+            return uri;
+        }
+
+        public String getHash() {
+            return hash;
+        }
     }
 
     @ConfigSerializable
