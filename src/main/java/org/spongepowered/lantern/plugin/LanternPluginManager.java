@@ -6,13 +6,13 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import net.minecraft.launchwrapper.Launch;
 import org.slf4j.Logger;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.lantern.Sponge;
 
 import java.io.IOException;
-import java.net.URLClassLoader;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,14 +31,10 @@ public class LanternPluginManager implements PluginManager {
     private final Map<String, PluginContainer> plugins = Maps.newHashMap();
     private final Map<Object, PluginContainer> pluginInstances = Maps.newIdentityHashMap();
 
-    private final LanternClassLoader classLoader;
-
     @Inject
     public LanternPluginManager(@Named("Lantern") PluginContainer lanternPlugin, @Named("Minecraft") PluginContainer minecraftPlugin) {
         registerPlugin(lanternPlugin);
         registerPlugin(minecraftPlugin);
-
-        classLoader = new LanternClassLoader((URLClassLoader) Sponge.class.getClassLoader());
     }
 
     private void registerPlugin(PluginContainer plugin) {
@@ -53,19 +49,23 @@ public class LanternPluginManager implements PluginManager {
             Sponge.getLogger().info("Scanning classpath for plugins...");
 
             // Find plugins on the classpath
-            plugins = PluginScanner.scanClassPath(classLoader);
+            plugins = PluginScanner.scanClassPath(Launch.classLoader);
             if (!plugins.isEmpty()) {
                 loadPlugins("classpath", plugins);
             }
         }
 
-        try(DirectoryStream<Path> stream = Files.newDirectoryStream(Sponge.getPluginsDirectory(), PluginScanner.ARCHIVE)) {
-            for(Path path : stream) {
-                plugins = PluginScanner.scanZip(path);
-                if(!plugins.isEmpty()) {
-                    classLoader.addURL(path.toUri().toURL());
+        try (DirectoryStream<Path> dir = Files.newDirectoryStream(Sponge.getPluginsDirectory(), PluginScanner.ARCHIVE_FILTER)) {
+            for (Path jar : dir) {
+                // Search for plugins in the JAR
+                plugins = PluginScanner.scanZip(jar);
 
-                    loadPlugins(path, plugins);
+                if (!plugins.isEmpty()) {
+                    // Add plugin to the classpath
+                    Launch.classLoader.addURL(jar.toUri().toURL());
+
+                    // Load the plugins
+                    loadPlugins(jar, plugins);
                 }
             }
         }
@@ -88,9 +88,9 @@ public class LanternPluginManager implements PluginManager {
 
     @Override
     public Optional<PluginContainer> fromInstance(Object instance) {
-        checkNotNull(instance);
+        checkNotNull(instance, "instance");
 
-        if(instance instanceof PluginContainer) {
+        if (instance instanceof PluginContainer) {
             return Optional.of((PluginContainer) instance);
         }
 
@@ -99,7 +99,7 @@ public class LanternPluginManager implements PluginManager {
 
     @Override
     public Optional<PluginContainer> getPlugin(String id) {
-        return Optional.ofNullable(plugins.get(id));
+        return Optional.ofNullable(this.plugins.get(id));
     }
 
     @Override
@@ -116,4 +116,5 @@ public class LanternPluginManager implements PluginManager {
     public boolean isLoaded(String id) {
         return this.plugins.containsKey(id);
     }
+
 }
