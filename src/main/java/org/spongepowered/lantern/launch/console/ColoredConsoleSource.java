@@ -1,4 +1,4 @@
-package org.spongepowered.lantern.console;
+package org.spongepowered.lantern.launch.console;
 
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;

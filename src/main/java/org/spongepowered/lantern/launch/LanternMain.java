@@ -25,10 +25,21 @@
 package org.spongepowered.lantern.launch;
 
 import com.google.inject.Injector;
+import net.minecraft.launchwrapper.Launch;
+import org.spongepowered.lantern.launch.console.ConsoleManager;
 
 public class LanternMain {
 
     public static void main(String[] args) {
+        Launch.main(join(args,
+                "--tweakClass", "org.spongepowered.lantern.launch.LanternTweaker"
+        ));
+    }
 
+    private static String[] join(String[] args, String... prefix) {
+        String[] result = new String[prefix.length + args.length];
+        System.arraycopy(prefix, 0, result, 0, prefix.length);
+        System.arraycopy(args, 0, result, prefix.length, args.length);
+        return result;
     }
 }

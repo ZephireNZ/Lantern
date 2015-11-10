@@ -28,7 +28,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.scheduler.Task;
-import org.spongepowered.lantern.Lantern;
+import org.spongepowered.lantern.Sponge;
 
 import java.util.Map;
 import java.util.Optional;
@@ -173,7 +173,7 @@ abstract class SchedulerBase {
             try {
                 task.getConsumer().accept(task);
             } catch (Throwable t) {
-                Lantern.getLogger().error("The Scheduler tried to run the task {} owned by {}, but an error occured.", task.getName(),
+                Sponge.getLogger().error("The Scheduler tried to run the task {} owned by {}, but an error occured.", task.getName(),
                         task.getOwner(), t);
             }
         });

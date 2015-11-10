@@ -7,7 +7,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AnnotationNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.api.plugin.Plugin;
-import org.spongepowered.lantern.Lantern;
+import org.spongepowered.lantern.Sponge;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -58,12 +58,12 @@ final class PluginScanner {
 
         for (URL url : loader.getURLs()) {
             if (!url.getProtocol().equals("file")) {
-                Lantern.getLogger().warn("Skipping unsupported classpath source: {}", url);
+                Sponge.getLogger().warn("Skipping unsupported classpath source: {}", url);
                 continue;
             }
 
             if (url.getPath().startsWith(JAVA_HOME)) {
-                Lantern.getLogger().trace("Skipping JRE classpath entry: {}", url);
+                Sponge.getLogger().trace("Skipping JRE classpath entry: {}", url);
                 continue;
             }
 
@@ -71,7 +71,7 @@ final class PluginScanner {
             try {
                 source = url.toURI();
             } catch (URISyntaxException e) {
-                Lantern.getLogger().error("Failed to search for classpath plugins in {}", url);
+                Sponge.getLogger().error("Failed to search for classpath plugins in {}", url);
                 continue;
             }
 
@@ -80,14 +80,14 @@ final class PluginScanner {
             }
         }
 
-        Lantern.getLogger().trace("Found {} plugin(s): {}", plugins.size(), plugins);
+        Sponge.getLogger().trace("Found {} plugin(s): {}", plugins.size(), plugins);
         return plugins;
     }
 
     private static Set<String> scanFile(File file) {
         Set<String> plugins = Sets.newHashSet();
         scanFile(file, plugins);
-        Lantern.getLogger().trace("Found {} plugin(s): {}", plugins.size(), plugins);
+        Sponge.getLogger().trace("Found {} plugin(s): {}", plugins.size(), plugins);
         return plugins;
     }
 
@@ -102,12 +102,12 @@ final class PluginScanner {
     }
 
     private static void scanDirectory(File dir, final Set<String> plugins) {
-        Lantern.getLogger().trace("Scanning {} for plugins", dir);
+        Sponge.getLogger().trace("Scanning {} for plugins", dir);
 
         try {
             scanDirectory0(dir, plugins);
         } catch (IOException e) {
-            Lantern.getLogger().error("Failed to search for plugins in {}", dir, e);
+            Sponge.getLogger().error("Failed to search for plugins in {}", dir, e);
         }
     }
 
@@ -134,12 +134,12 @@ final class PluginScanner {
     static Set<String> scanZip(File file) {
         Set<String> plugins = Sets.newHashSet();
         scanZip(file, plugins);
-        Lantern.getLogger().trace("Found {} plugin(s): {}", plugins.size(), plugins);
+        Sponge.getLogger().trace("Found {} plugin(s): {}", plugins.size(), plugins);
         return plugins;
     }
 
     private static void scanZip(File file, Set<String> plugins) {
-        Lantern.getLogger().trace("Scanning {} for plugins", file);
+        Sponge.getLogger().trace("Scanning {} for plugins", file);
 
         if (!ARCHIVE.accept(null, file.getName())) {
             return;
@@ -170,7 +170,7 @@ final class PluginScanner {
                 zip.close();
             }
         } catch (IOException e) {
-            Lantern.getLogger().error("Failed to load plugin JAR: {}", file, e);
+            Sponge.getLogger().error("Failed to load plugin JAR: {}", file, e);
         }
     }
 

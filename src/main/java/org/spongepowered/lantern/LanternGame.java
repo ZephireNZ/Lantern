@@ -26,9 +26,9 @@ package org.spongepowered.lantern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.GameDictionary;
 import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.GameState;
 import org.spongepowered.api.Platform;
@@ -40,23 +40,24 @@ import org.spongepowered.api.service.command.CommandService;
 import org.spongepowered.api.service.event.EventManager;
 import org.spongepowered.api.service.scheduler.SchedulerService;
 import org.spongepowered.api.world.TeleportHelper;
+import org.spongepowered.lantern.registry.LanternGameRegistry;
 import org.spongepowered.lantern.service.scheduler.LanternScheduler;
 
-import java.io.File;
+import java.nio.file.Path;
 
 public class LanternGame implements Game {
 
-    private final Platform platform = new LanternPlatform(Lantern.MINECRAFT_VERSION, Lantern.API_VERSION, Lantern.IMPLEMENTATION_VERSION);
+    private final Platform platform = new LanternPlatform(Sponge.MINECRAFT_VERSION, Sponge.API_VERSION, Sponge.IMPLEMENTATION_VERSION);
     private final PluginManager pluginManager;
     private final EventManager eventManager;
-    private final GameRegistry gameRegistry;
+    private final LanternGameRegistry gameRegistry;
     private final ServiceManager serviceManager;
     private final TeleportHelper teleportHelper;
 
     private GameState state = GameState.CONSTRUCTION;
 
     @Inject
-    public LanternGame(PluginManager pluginManager, EventManager eventManager, GameRegistry gameRegistry, ServiceManager serviceManager, TeleportHelper teleportHelper) {
+    public LanternGame(PluginManager pluginManager, EventManager eventManager, LanternGameRegistry gameRegistry, ServiceManager serviceManager, TeleportHelper teleportHelper) {
         this.pluginManager = checkNotNull(pluginManager);
         this.eventManager = checkNotNull(eventManager);
         this.gameRegistry = checkNotNull(gameRegistry);
@@ -85,7 +86,7 @@ public class LanternGame implements Game {
     }
 
     @Override
-    public GameRegistry getRegistry() {
+    public LanternGameRegistry getRegistry() {
         return gameRegistry;
     }
 
@@ -110,8 +111,8 @@ public class LanternGame implements Game {
     }
 
     @Override
-    public File getSavesDirectory() {
-        return null; //TODO: Implement
+    public Path getSavesDirectory() {
+        return Sponge.getGameDirectory();
     }
 
     @Override
@@ -125,6 +126,11 @@ public class LanternGame implements Game {
 
     @Override
     public ChannelRegistrar getChannelRegistrar() {
+        return null; //TODO: Implement
+    }
+
+    @Override
+    public GameDictionary getGameDictionary() {
         return null; //TODO: Implement
     }
 }

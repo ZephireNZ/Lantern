@@ -25,6 +25,10 @@ repositories {
         name = 'sonatype'
         url = 'http://oss.sonatype.org/content/repositories/public'
     }
+    maven {
+        name = 'mojang'
+        url = 'https://libraries.minecraft.net/'
+    }
 }
 
 dependencies {
@@ -33,6 +37,7 @@ dependencies {
     compile 'jline:jline:2.13'
     compile 'org.ow2.asm:asm-debug-all:5.0.4'
     runtime 'org.ow2.asm:asm-all:5.0.4'
+    compile 'net.minecraft:launchwrapper:1.12'
 }
 
 defaultTasks 'licenseFormat', 'shadowJar'

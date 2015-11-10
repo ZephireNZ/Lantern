@@ -1,10 +1,10 @@
-package org.spongepowered.lantern.console;
+package org.spongepowered.lantern.launch.console;
 
 import jline.console.ConsoleReader;
 import jline.console.completer.Completer;
 import org.fusesource.jansi.AnsiConsole;
 import org.spongepowered.api.util.command.source.ConsoleSource;
-import org.spongepowered.lantern.Lantern;
+import org.spongepowered.lantern.Sponge;
 import org.spongepowered.lantern.service.scheduler.LanternScheduler;
 
 import java.io.ByteArrayOutputStream;
@@ -119,9 +119,9 @@ public final class ConsoleManager {
             try {
                 LanternScheduler.getInstance().createTaskBuilder()
                         .execute(() -> {
-                            candidates.addAll(Lantern.getGame().getCommandDispatcher().getSuggestions(ConsoleManager.this.sender, buffer));
+                            candidates.addAll(Sponge.getGame().getCommandDispatcher().getSuggestions(ConsoleManager.this.sender, buffer));
                         })
-                        .submit(Lantern.getLantern());
+                        .submit(Sponge.getSponge());
 
                 return buffer.lastIndexOf(' ') + 1;
             } catch (Throwable t) {
@@ -146,9 +146,9 @@ public final class ConsoleManager {
                     final String tempCommand = command.trim();
                     LanternScheduler.getInstance().createTaskBuilder()
                             .execute(() -> {
-                                Lantern.getGame().getCommandDispatcher().process(ConsoleManager.this.sender, tempCommand);
+                                Sponge.getGame().getCommandDispatcher().process(ConsoleManager.this.sender, tempCommand);
                             })
-                            .submit(Lantern.getLantern());
+                            .submit(Sponge.getSponge());
 
                 } catch (Exception ex) {
                     logger.log(Level.SEVERE, "Error while executing command: " + command, ex);

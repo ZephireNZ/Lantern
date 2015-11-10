@@ -15,6 +15,7 @@ import org.spongepowered.lantern.plugin.LanternPluginContainer;
 import org.spongepowered.lantern.service.config.LanternConfigService;
 
 import java.io.File;
+import java.nio.file.Path;
 
 public class LanternPluginGuiceModule extends AbstractModule {
 
@@ -37,9 +38,12 @@ public class LanternPluginGuiceModule extends AbstractModule {
         bind(Logger.class).toInstance(this.container.getLogger());
 
         // Plugin-private config directory (shared dir is in the global guice module)
-        bind(File.class).annotatedWith(privateConfigDir).toProvider(PrivateConfigDirProvider.class);
-        bind(File.class).annotatedWith(sharedConfigFile).toProvider(SharedConfigFileProvider.class); // Shared-directory config file
-        bind(File.class).annotatedWith(privateConfigFile).toProvider(PrivateConfigFileProvider.class); // Plugin-private directory config file
+        bind(Path.class).annotatedWith(privateConfigDir).toProvider(PrivateConfigDirProvider.class);
+        bind(File.class).annotatedWith(privateConfigDir).toProvider(FilePrivateConfigDirProvider.class);
+        bind(Path.class).annotatedWith(sharedConfigFile).toProvider(SharedConfigFileProvider.class); // Shared-directory config file
+        bind(File.class).annotatedWith(sharedConfigFile).toProvider(FileSharedConfigFileProvider.class);
+        bind(Path.class).annotatedWith(privateConfigFile).toProvider(PrivateConfigFileProvider.class); // Plugin-private directory config file
+        bind(File.class).annotatedWith(privateConfigFile).toProvider(FilePrivateConfigFileProvider.class);
 
         bind(new TypeLiteral<ConfigurationLoader<CommentedConfigurationNode>>() {
         }).annotatedWith(sharedConfigFile)
@@ -49,7 +53,7 @@ public class LanternPluginGuiceModule extends AbstractModule {
                 .toProvider(PrivateHoconConfigProvider.class); // Loader for plugin-private directory config file
     }
 
-    private static class PrivateConfigDirProvider implements Provider<File> {
+    private static class PrivateConfigDirProvider implements Provider<Path> {
 
         private final PluginContainer container;
 
@@ -59,12 +63,12 @@ public class LanternPluginGuiceModule extends AbstractModule {
         }
 
         @Override
-        public File get() {
+        public Path get() {
             return LanternConfigService.getPrivateRoot(this.container).getDirectory();
         }
     }
 
-    private static class PrivateConfigFileProvider implements Provider<File> {
+    private static class PrivateConfigFileProvider implements Provider<Path> {
 
         private final PluginContainer container;
 
@@ -74,13 +78,13 @@ public class LanternPluginGuiceModule extends AbstractModule {
         }
 
         @Override
-        public File get() {
-            return LanternConfigService.getPrivateRoot(this.container).getConfigFile();
+        public Path get() {
+            return LanternConfigService.getPrivateRoot(this.container).getConfigPath();
         }
 
     }
 
-    private static class SharedConfigFileProvider implements Provider<File> {
+    private static class SharedConfigFileProvider implements Provider<Path> {
 
         private final PluginContainer container;
 
@@ -90,8 +94,8 @@ public class LanternPluginGuiceModule extends AbstractModule {
         }
 
         @Override
-        public File get() {
-            return LanternConfigService.getSharedRoot(this.container).getConfigFile();
+        public Path get() {
+            return LanternConfigService.getSharedRoot(this.container).getConfigPath();
         }
 
     }
@@ -124,6 +128,56 @@ public class LanternPluginGuiceModule extends AbstractModule {
         @Override
         public ConfigurationLoader<CommentedConfigurationNode> get() {
             return LanternConfigService.getPrivateRoot(this.container).getConfig();
+        }
+
+    }
+
+    // TODO: Support this without extra classes (basically it would be nice if Guice allowed something like an "alias" for File so we would only
+    // need to add the conversion step Path -> File (Path.toFile()) once.
+
+    private static class FilePrivateConfigDirProvider implements Provider<File> {
+
+        private final Path configDir;
+
+        @Inject
+        private FilePrivateConfigDirProvider(@ConfigDir(sharedRoot = false) Path configDir) {
+            this.configDir = configDir;
+        }
+
+        @Override
+        public File get() {
+            return configDir.toFile();
+        }
+    }
+
+    private static class FilePrivateConfigFileProvider implements Provider<File> {
+
+        private final Path configPath;
+
+        @Inject
+        private FilePrivateConfigFileProvider(@DefaultConfig(sharedRoot = false) Path configPath) {
+            this.configPath = configPath;
+        }
+
+        @Override
+        public File get() {
+            return configPath.toFile();
+        }
+
+    }
+
+    private static class FileSharedConfigFileProvider implements Provider<File> {
+
+        private final Path configPath;
+
+        @Inject
+        private FileSharedConfigFileProvider(@DefaultConfig(sharedRoot = true) Path configPath) {
+            this.configPath = configPath;
+        }
+
+        @Override
+        public File get() {
+            return configPath.toFile();
         }
 
     }

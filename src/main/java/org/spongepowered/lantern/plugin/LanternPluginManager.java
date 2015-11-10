@@ -2,7 +2,6 @@ package org.spongepowered.lantern.plugin;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -10,7 +9,7 @@ import com.google.inject.name.Named;
 import org.slf4j.Logger;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
-import org.spongepowered.lantern.Lantern;
+import org.spongepowered.lantern.Sponge;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,7 +36,7 @@ public class LanternPluginManager implements PluginManager {
         registerPlugin(lanternPlugin);
         registerPlugin(minecraftPlugin);
 
-        classLoader = new LanternClassLoader((URLClassLoader) Lantern.class.getClassLoader());
+        classLoader = new LanternClassLoader((URLClassLoader) Sponge.class.getClassLoader());
     }
 
     private void registerPlugin(PluginContainer plugin) {
@@ -49,7 +48,7 @@ public class LanternPluginManager implements PluginManager {
         Set<String> plugins;
 
         if (SCAN_CLASSPATH) {
-            Lantern.getLogger().info("Scanning classpath for plugins...");
+            Sponge.getLogger().info("Scanning classpath for plugins...");
 
             // Find plugins on the classpath
             plugins = PluginScanner.scanClassPath(classLoader);
@@ -58,7 +57,7 @@ public class LanternPluginManager implements PluginManager {
             }
         }
 
-        for (File jar : Lantern.getPluginsDirectory().listFiles(PluginScanner.ARCHIVE)) {
+        for (File jar : Sponge.getPluginsDirectory().listFiles(PluginScanner.ARCHIVE)) {
             // Search for plugins in the JAR
             plugins = PluginScanner.scanZip(jar);
 
@@ -78,11 +77,11 @@ public class LanternPluginManager implements PluginManager {
                 Class<?> pluginClass = Class.forName(plugin);
                 LanternPluginContainer container = new LanternPluginContainer(pluginClass);
                 registerPlugin(container);
-                Lantern.getGame().getEventManager().registerListeners(container, container.getInstance());
+                Sponge.getGame().getEventManager().registerListeners(container, container.getInstance());
 
-                Lantern.getLogger().info("Loaded plugin: {} {} (from {})", container.getName(), container.getVersion(), source);
+                Sponge.getLogger().info("Loaded plugin: {} {} (from {})", container.getName(), container.getVersion(), source);
             } catch (Throwable e) {
-                Lantern.getLogger().error("Failed to load plugin: {} (from {})", plugin, source, e);
+                Sponge.getLogger().error("Failed to load plugin: {} (from {})", plugin, source, e);
             }
         }
     }

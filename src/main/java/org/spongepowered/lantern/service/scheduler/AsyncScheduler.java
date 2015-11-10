@@ -25,7 +25,7 @@
 package org.spongepowered.lantern.service.scheduler;
 
 import org.spongepowered.api.service.scheduler.Task;
-import org.spongepowered.lantern.Lantern;
+import org.spongepowered.lantern.Sponge;
 
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -111,7 +111,7 @@ public class AsyncScheduler extends SchedulerBase {
             // The taskMap has been modified; there is work to do.
             // Continue on without handling the Exception.
         } catch (IllegalMonitorStateException e) {
-            Lantern.getLogger().error("The scheduler internal state machine suffered a catastrophic error", e);
+            Sponge.getLogger().error("The scheduler internal state machine suffered a catastrophic error", e);
         }
     }
 
