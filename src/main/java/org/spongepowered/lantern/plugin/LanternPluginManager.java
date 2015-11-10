@@ -11,9 +11,11 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.lantern.Sponge;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URLClassLoader;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -57,16 +59,14 @@ public class LanternPluginManager implements PluginManager {
             }
         }
 
-        for (File jar : Sponge.getPluginsDirectory().listFiles(PluginScanner.ARCHIVE)) {
-            // Search for plugins in the JAR
-            plugins = PluginScanner.scanZip(jar);
+        try(DirectoryStream<Path> stream = Files.newDirectoryStream(Sponge.getPluginsDirectory(), PluginScanner.ARCHIVE)) {
+            for(Path path : stream) {
+                plugins = PluginScanner.scanZip(path);
+                if(!plugins.isEmpty()) {
+                    classLoader.addURL(path.toUri().toURL());
 
-            if (!plugins.isEmpty()) {
-                // Add plugin to the classpath
-                classLoader.addURL(jar.toURI().toURL());
-
-                // Load the plugins
-                loadPlugins(jar, plugins);
+                    loadPlugins(path, plugins);
+                }
             }
         }
     }

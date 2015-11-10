@@ -4,7 +4,6 @@ import static org.spongepowered.lantern.Sponge.*;
 
 import com.google.common.base.Throwables;
 import com.google.inject.Guice;
-import org.apache.logging.log4j.LogManager;
 import org.spongepowered.api.GameState;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactoryUtils;
@@ -24,8 +23,13 @@ import java.nio.file.Path;
 
 public class Lantern implements PluginContainer {
 
-    public static final Lantern instance = new Lantern();
+    public static Lantern instance;
     private final LanternGame game;
+
+    public static void main(String[] args) {
+        instance = new Lantern();
+    }
+
 
     private Lantern() {
         Guice.createInjector(new LanternGuiceModule(this)).getInstance(Sponge.class);

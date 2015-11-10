@@ -9,19 +9,17 @@ import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.lantern.Sponge;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Enumeration;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Set;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import javax.annotation.Nullable;
@@ -34,20 +32,9 @@ final class PluginScanner {
 
     private static final String CLASS_EXTENSION = ".class";
 
-    private static final FileFilter CLASS_OR_DIRECTORY = new FileFilter() {
+    static final DirectoryStream.Filter<Path> CLASS_OR_DIRECTORY = path -> Files.isDirectory(path) || path.endsWith(CLASS_EXTENSION);
 
-        @Override
-        public boolean accept(File file) {
-            return file.isDirectory() || file.getName().endsWith(CLASS_EXTENSION);
-        }
-    };
-    static final FilenameFilter ARCHIVE = new FilenameFilter() {
-
-        @Override
-        public boolean accept(@Nullable File dir, String name) {
-            return name.endsWith(".jar") || name.endsWith(".zip");
-        }
-    };
+    static final DirectoryStream.Filter<Path> ARCHIVE = path -> path.endsWith(".jar") || path.endsWith(".zip");
 
     private PluginScanner() {
     }
@@ -76,7 +63,7 @@ final class PluginScanner {
             }
 
             if (sources.add(source)) {
-                scanFile(new File(source), plugins);
+                scanFile(Paths.get(source), plugins);
             }
         }
 
@@ -84,24 +71,24 @@ final class PluginScanner {
         return plugins;
     }
 
-    private static Set<String> scanFile(File file) {
+    private static Set<String> scanFile(Path file) {
         Set<String> plugins = Sets.newHashSet();
         scanFile(file, plugins);
         Sponge.getLogger().trace("Found {} plugin(s): {}", plugins.size(), plugins);
         return plugins;
     }
 
-    private static void scanFile(File file, Set<String> plugins) {
-        if (file.exists()) {
-            if (file.isDirectory()) {
-                scanDirectory(file, plugins);
+    private static void scanFile(Path path, Set<String> plugins) {
+        if (Files.exists(path)) {
+            if (Files.isDirectory(path)) {
+                scanDirectory(path, plugins);
             } else {
-                scanZip(file, plugins);
+                scanZip(path, plugins);
             }
         }
     }
 
-    private static void scanDirectory(File dir, final Set<String> plugins) {
+    private static void scanDirectory(Path dir, final Set<String> plugins) {
         Sponge.getLogger().trace("Scanning {} for plugins", dir);
 
         try {
@@ -111,64 +98,57 @@ final class PluginScanner {
         }
     }
 
-    private static void scanDirectory0(File dir, Set<String> plugins) throws IOException {
-        for (File file : dir.listFiles(CLASS_OR_DIRECTORY)) {
-            if (file.isDirectory()) {
-                // Recurse into subdirectory
-                scanDirectory0(file, plugins);
-            } else {
-                // This is a class file
-                InputStream in = new FileInputStream(file);
-                try {
-                    String plugin = findPlugin(in);
-                    if (plugin != null) {
-                        plugins.add(plugin);
+    private static void scanDirectory0(Path dir, Set<String> plugins) throws IOException {
+        try(DirectoryStream<Path> stream = Files.newDirectoryStream(dir, CLASS_OR_DIRECTORY)) {
+            for(Path path : stream) {
+                if(Files.isDirectory(path)) {
+                    // Recurse into subdirectory
+                    scanDirectory0(path, plugins);
+                } else {
+                    // This is a class file
+                    Files.newInputStream(path);
+                    try(InputStream in = Files.newInputStream(path)) {
+                        String plugin = findPlugin(in);
+                        if(plugin != null) {
+                            plugins.add(plugin);
+                        }
                     }
-                } finally {
-                    in.close();
                 }
             }
         }
     }
 
-    static Set<String> scanZip(File file) {
+    static Set<String> scanZip(Path file) {
         Set<String> plugins = Sets.newHashSet();
         scanZip(file, plugins);
         Sponge.getLogger().trace("Found {} plugin(s): {}", plugins.size(), plugins);
         return plugins;
     }
 
-    private static void scanZip(File file, Set<String> plugins) {
+    private static void scanZip(Path file, Set<String> plugins) {
         Sponge.getLogger().trace("Scanning {} for plugins", file);
 
-        if (!ARCHIVE.accept(null, file.getName())) {
+        try {
+            if (!ARCHIVE.accept(file)) {
+                return;
+            }
+        } catch (IOException e) {
             return;
         }
 
         // Open the zip file so we can scan for plugins
-        try {
-            ZipFile zip = new ZipFile(file);
-            try {
-                Enumeration<? extends ZipEntry> entries = zip.entries();
-                while (entries.hasMoreElements()) {
-                    ZipEntry entry = entries.nextElement();
-                    if (entry.isDirectory() || !entry.getName().endsWith(CLASS_EXTENSION)) {
-                        continue;
-                    }
-
-                    InputStream in = zip.getInputStream(entry);
-                    try {
-                        String plugin = findPlugin(in);
-                        if (plugin != null) {
-                            plugins.add(plugin);
-                        }
-                    } finally {
-                        in.close();
-                    }
-                }
-            } finally {
-                zip.close();
-            }
+        try (ZipFile zip = new ZipFile(file.toFile())) {
+            zip.stream()
+                    .filter(entry -> !entry.isDirectory())
+                    .filter(entry -> !entry.getName().endsWith(CLASS_EXTENSION))
+                    .forEach(entry -> {
+                        try (InputStream in = zip.getInputStream(entry)) {
+                            String plugin = findPlugin(in);
+                            if(plugin != null) {
+                                plugins.add(plugin);
+                            }
+                        } catch (IOException ignored) {}
+                    });
         } catch (IOException e) {
             Sponge.getLogger().error("Failed to load plugin JAR: {}", file, e);
         }
