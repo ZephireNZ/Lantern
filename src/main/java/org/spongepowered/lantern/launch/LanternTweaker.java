@@ -69,7 +69,7 @@ public class LanternTweaker implements ITweaker {
         loader.addClassLoaderExclusion("org.spongepowered.lantern.launch.");
 
         logger.debug("Applying access transformer...");
-        Launch.blackboard.put("vanilla.at", new URL[]{ getResource("common_at.cfg"), getResource("vanilla_at.cfg") });
+        Launch.blackboard.put("lantern.at", new URL[]{ getResource("lantern_at.cfg") });
         loader.registerTransformer("org.spongepowered.lantern.launch.AccessTransformer");
 
         logger.info("Initialization finished. Starting Minecraft server...");
@@ -77,11 +77,11 @@ public class LanternTweaker implements ITweaker {
 
     @Override
     public String getLaunchTarget() {
-        return null; //TODO: Implement
+        return "org.spongepowered.lantern.LanternServer";
     }
 
     @Override
     public String[] getLaunchArguments() {
-        return new String[0]; //TODO: Implement
+        return this.args;
     }
 }
