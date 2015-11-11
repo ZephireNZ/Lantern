@@ -26,13 +26,12 @@ package org.spongepowered.lantern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.GameDictionary;
-import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.GameState;
 import org.spongepowered.api.Platform;
-import org.spongepowered.api.Server;
 import org.spongepowered.api.network.ChannelRegistrar;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.service.ServiceManager;
@@ -55,6 +54,7 @@ public class LanternGame implements Game {
     private final TeleportHelper teleportHelper;
 
     private GameState state = GameState.CONSTRUCTION;
+    private LanternServer server;
 
     @Inject
     public LanternGame(PluginManager pluginManager, EventManager eventManager, LanternGameRegistry gameRegistry, ServiceManager serviceManager, TeleportHelper teleportHelper) {
@@ -71,8 +71,13 @@ public class LanternGame implements Game {
     }
 
     @Override
-    public Server getServer() {
-        return null; //TODO: Implement
+    public LanternServer getServer() {
+        return this.server;
+    }
+
+    public void setServer(LanternServer server) {
+        Preconditions.checkState(this.server == null, "Server has already been initialised!");
+        this.server = checkNotNull(server);
     }
 
     @Override

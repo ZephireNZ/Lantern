@@ -36,6 +36,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldCreationSettings;
 import org.spongepowered.api.world.storage.ChunkLayout;
 import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.lantern.launch.console.ConsoleManager;
 
 import java.net.InetSocketAddress;
 import java.util.Collection;
@@ -43,6 +44,33 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class LanternServer implements Server {
+
+    /**
+     * The console manager of this server.
+     */
+    private final ConsoleManager consoleManager = new ConsoleManager();
+
+    public LanternServer() {
+        //TODO: Get Ops, whitelist, bans
+
+        start();
+        bind();
+    }
+
+    public void start() {
+        consoleManager.startConsole();
+        consoleManager.startFile("latest.log"); //TODO: proper logging
+
+        //TODO: Load Ops, whitelist, bans
+
+        //TODO: Load worlds
+
+        //TODO: Start schedulers
+    }
+
+    public void bind() {
+        //TODO: Implement
+    }
 
     @Override
     public Collection<Player> getOnlinePlayers() {

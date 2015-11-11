@@ -6,13 +6,17 @@ import com.google.common.base.Throwables;
 import com.google.inject.Guice;
 import org.spongepowered.api.GameState;
 import org.spongepowered.api.event.Event;
+import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.SpongeEventFactoryUtils;
+import org.spongepowered.api.event.game.state.GameAboutToStartServerEvent;
 import org.spongepowered.api.event.game.state.GameConstructionEvent;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GameLoadCompleteEvent;
 import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
+import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.game.state.GameStateEvent;
+import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.lantern.guice.LanternGuiceModule;
 import org.spongepowered.lantern.plugin.LanternPluginManager;
@@ -28,6 +32,7 @@ public class Lantern implements PluginContainer {
 
     public static void main(String[] args) {
         instance = new Lantern();
+        //TODO: Options
     }
 
 
@@ -35,6 +40,12 @@ public class Lantern implements PluginContainer {
         Guice.createInjector(new LanternGuiceModule(this)).getInstance(Sponge.class);
 
         this.game = Sponge.getGame();
+
+        preInit();
+
+        init();
+
+        Sponge.getGame().setServer(new LanternServer());
     }
 
     public void preInit() {
@@ -79,6 +90,21 @@ public class Lantern implements PluginContainer {
         Sponge.getLogger().info("Successfully loaded and initialized plugins.");
 
         postState(GameLoadCompleteEvent.class, GameState.LOAD_COMPLETE);
+    }
+
+    @Listener
+    public void onServerAboutToStart(GameAboutToStartServerEvent event) {
+        //TODO: Implement
+    }
+
+    @Listener
+    public void onServerStarted(GameStartedServerEvent event) {
+        //TODO: Implement
+    }
+
+    @Listener
+    public void onServerStopping(GameStoppingServerEvent event) {
+        //TODO: Implement
     }
 
     public void postState(Class<? extends GameStateEvent> type, GameState state) {
