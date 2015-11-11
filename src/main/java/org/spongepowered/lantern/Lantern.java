@@ -1,6 +1,7 @@
 package org.spongepowered.lantern;
 
-import static org.spongepowered.lantern.Sponge.*;
+import static org.spongepowered.lantern.Sponge.ECOSYSTEM_NAME;
+import static org.spongepowered.lantern.Sponge.IMPLEMENTATION_VERSION;
 
 import com.google.common.base.Throwables;
 import com.google.inject.Guice;
@@ -113,7 +114,7 @@ public class Lantern implements PluginContainer {
     }
 
     public static boolean postEvent(Event event) {
-        return getGame().getEventManager().post(event);
+        return Sponge.getGame().getEventManager().post(event);
     }
 
     @Override
