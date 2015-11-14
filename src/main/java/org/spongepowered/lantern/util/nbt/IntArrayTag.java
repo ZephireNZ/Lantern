@@ -3,7 +3,7 @@ package org.spongepowered.lantern.util.nbt;
 /**
  * The {@code TAG_Int_Array} tag.
  */
-final class IntArrayTag extends Tag<int[]> {
+public final class IntArrayTag extends Tag<int[]> {
 
     /**
      * The value.
@@ -15,7 +15,7 @@ final class IntArrayTag extends Tag<int[]> {
      * @param value The value.
      */
     public IntArrayTag(int[] value) {
-        super(TagType.INT_ARRAY);
+        super(TagTypes.INT_ARRAY);
         this.value = value;
     }
 

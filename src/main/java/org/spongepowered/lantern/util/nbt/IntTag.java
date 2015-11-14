@@ -3,7 +3,7 @@ package org.spongepowered.lantern.util.nbt;
 /**
  * The {@code TAG_Int} tag.
  */
-final class IntTag extends Tag<Integer> {
+public final class IntTag extends Tag<Integer> {
 
     /**
      * The value.
@@ -15,7 +15,7 @@ final class IntTag extends Tag<Integer> {
      * @param value The value.
      */
     public IntTag(int value) {
-        super(TagType.INT);
+        super(TagTypes.INT);
         this.value = value;
     }
 

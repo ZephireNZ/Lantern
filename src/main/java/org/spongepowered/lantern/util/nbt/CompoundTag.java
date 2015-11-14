@@ -23,7 +23,7 @@ public final class CompoundTag extends Tag<Map<String, Tag>> {
      * Creates a new, empty CompoundTag.
      */
     public CompoundTag() {
-        super(TagType.COMPOUND);
+        super(TagTypes.COMPOUND);
     }
 
     @Override
@@ -122,7 +122,7 @@ public final class CompoundTag extends Tag<Map<String, Tag>> {
 
     @SuppressWarnings("unchecked")
     public List<CompoundTag> getCompoundList(String key) {
-        return (List<CompoundTag>) getTagList(key, TagType.COMPOUND);
+        return (List<CompoundTag>) getTagList(key, TagTypes.COMPOUND);
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -242,37 +242,37 @@ public final class CompoundTag extends Tag<Map<String, Tag>> {
     }
 
     public void putCompoundList(String key, List<CompoundTag> list) {
-        put(key, new ListTag<>(TagType.COMPOUND, list));
+        put(key, new ListTag<>(TagTypes.COMPOUND, list));
     }
 
     ////////////////////////////////////////////////////////////////////////////
     // Accessor helpers
 
-    private <T extends Tag<?>> boolean is(String key, Class<T> clazz) {
+    public <T extends Tag<?>> boolean is(String key, Class<T> clazz) {
         if (!containsKey(key)) return false;
         final Tag tag = value.get(key);
         return tag != null && clazz == tag.getClass();
     }
 
-    void put(String key, Tag tag) {
+    public void put(String key, Tag tag) {
         Validate.notNull(key, "Key cannot be null");
         Validate.notNull(tag, "Tag cannot be null");
         value.put(key, tag);
     }
 
-    private <V, T extends Tag<V>> V get(String key, Class<T> clazz) {
+    public <V, T extends Tag<V>> V get(String key, Class<T> clazz) {
         return getTag(key, clazz).getValue();
     }
 
     @SuppressWarnings("unchecked")
-    private <T extends Tag<?>> T getTag(String key, Class<T> clazz) {
+    public <T extends Tag<?>> T getTag(String key, Class<T> clazz) {
         if (!is(key, clazz)) {
             throw new IllegalArgumentException("Compound does not contain " + clazz.getSimpleName() + " \"" + key + "\"");
         }
         return (T) value.get(key);
     }
 
-    private List<? extends Tag> getTagList(String key, TagType type) {
+    public List<? extends Tag> getTagList(String key, TagType type) {
         ListTag<?> tag = getTag(key, ListTag.class);
         if (tag.getValue().size() == 0) {
             // empty lists are allowed to be the wrong type

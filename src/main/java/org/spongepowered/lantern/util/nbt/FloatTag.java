@@ -3,7 +3,7 @@ package org.spongepowered.lantern.util.nbt;
 /**
  * The {@code TAG_Float} tag.
  */
-final class FloatTag extends Tag<Float> {
+public final class FloatTag extends Tag<Float> {
 
     /**
      * The value.
@@ -15,7 +15,7 @@ final class FloatTag extends Tag<Float> {
      * @param value The value.
      */
     public FloatTag(float value) {
-        super(TagType.FLOAT);
+        super(TagTypes.FLOAT);
         this.value = value;
     }
 

@@ -3,7 +3,7 @@ package org.spongepowered.lantern.util.nbt;
 /**
  * The {@code TAG_Long} tag.
  */
-final class LongTag extends Tag<Long> {
+public final class LongTag extends Tag<Long> {
 
     /**
      * The value.
@@ -15,7 +15,7 @@ final class LongTag extends Tag<Long> {
      * @param value The value.
      */
     public LongTag(long value) {
-        super(TagType.LONG);
+        super(TagTypes.LONG);
         this.value = value;
     }
 

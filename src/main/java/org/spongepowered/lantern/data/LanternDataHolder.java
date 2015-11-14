@@ -23,10 +23,16 @@ public abstract class LanternDataHolder implements DataHolder {
 
     private Map<Class<? extends DataManipulator<?, ?>>, DataManipulator<?, ?>> containerStore = Maps.newIdentityHashMap();
 
-    public LanternDataHolder() {}
-
     public LanternDataHolder(Map<Class<? extends DataManipulator<?, ?>>, DataManipulator<?, ?>> containerStore) {
         this.containerStore = Preconditions.checkNotNull(containerStore);
+    }
+
+    public LanternDataHolder(DataContainer container) {
+        //TODO: Implement
+    }
+
+    public Collection<DataManipulator<?, ?>> getApplicableManipulators() {
+        return null; //TODO: Implement
     }
 
     @SuppressWarnings("unchecked")

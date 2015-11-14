@@ -3,7 +3,7 @@ package org.spongepowered.lantern.util.nbt;
 /**
  * The {@code TAG_Short} tag.
  */
-final class ShortTag extends Tag<Short> {
+public final class ShortTag extends Tag<Short> {
 
     /**
      * The value.
@@ -15,7 +15,7 @@ final class ShortTag extends Tag<Short> {
      * @param value The value.
      */
     public ShortTag(short value) {
-        super(TagType.SHORT);
+        super(TagTypes.SHORT);
         this.value = value;
     }
 

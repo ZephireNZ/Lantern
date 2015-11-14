@@ -54,8 +54,8 @@ public final class NBTInputStream implements Closeable {
      */
     public CompoundTag readCompound() throws IOException {
         // read type
-        TagType type = TagType.byIdOrError(is.readUnsignedByte());
-        if (type != TagType.COMPOUND) {
+        TagType type = TagTypes.byIdOrError(is.readUnsignedByte());
+        if (type != TagTypes.COMPOUND) {
             throw new IOException("Root of NBTInputStream was " + type + ", not COMPOUND");
         }
 
@@ -72,8 +72,8 @@ public final class NBTInputStream implements Closeable {
 
         while (true) {
             // read type
-            TagType type = TagType.byIdOrError(is.readUnsignedByte());
-            if (type == TagType.END) {
+            TagType type = TagTypes.byIdOrError(is.readUnsignedByte());
+            if (type == TagTypes.END) {
                 break;
             }
 
@@ -101,39 +101,41 @@ public final class NBTInputStream implements Closeable {
      */
     @SuppressWarnings("unchecked")
     private Tag readTagPayload(TagType type, int depth) throws IOException {
-        switch (type) {
-            case BYTE:
+        switch (type.getId()) {
+            case 0:
+                return new EndTag();
+            case 1:
                 return new ByteTag(is.readByte());
 
-            case SHORT:
+            case 2:
                 return new ShortTag(is.readShort());
 
-            case INT:
+            case 3:
                 return new IntTag(is.readInt());
 
-            case LONG:
+            case 4:
                 return new LongTag(is.readLong());
 
-            case FLOAT:
+            case 5:
                 return new FloatTag(is.readFloat());
 
-            case DOUBLE:
+            case 6:
                 return new DoubleTag(is.readDouble());
 
-            case BYTE_ARRAY:
+            case 7:
                 int length = is.readInt();
                 byte[] bytes = new byte[length];
                 is.readFully(bytes);
                 return new ByteArrayTag(bytes);
 
-            case STRING:
+            case 8:
                 length = is.readShort();
                 bytes = new byte[length];
                 is.readFully(bytes);
                 return new StringTag(new String(bytes, StandardCharsets.UTF_8));
 
-            case LIST:
-                TagType childType = TagType.byIdOrError(is.readUnsignedByte());
+            case 9:
+                TagType childType = TagTypes.byIdOrError(is.readUnsignedByte());
                 length = is.readInt();
 
                 List<Tag> tagList = new ArrayList<>();
@@ -143,10 +145,10 @@ public final class NBTInputStream implements Closeable {
 
                 return new ListTag(childType, tagList);
 
-            case COMPOUND:
+            case 10:
                 return readCompound(depth + 1);
 
-            case INT_ARRAY:
+            case 11:
                 length = is.readInt();
                 int[] ints = new int[length];
                 for (int i = 0; i < length; ++i) {

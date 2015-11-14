@@ -3,7 +3,7 @@ package org.spongepowered.lantern.util.nbt;
 /**
  * The {@code TAG_Double} tag.
  */
-final class DoubleTag extends Tag<Double> {
+public final class DoubleTag extends Tag<Double> {
 
     /**
      * The value.

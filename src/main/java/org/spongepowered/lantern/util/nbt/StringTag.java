@@ -3,7 +3,7 @@ package org.spongepowered.lantern.util.nbt;
 /**
  * The {@code TAG_String} tag.
  */
-final class StringTag extends Tag<String> {
+public final class StringTag extends Tag<String> {
 
     /**
      * The value.
@@ -15,7 +15,7 @@ final class StringTag extends Tag<String> {
      * @param value The value.
      */
     public StringTag(String value) {
-        super(TagType.STRING);
+        super(TagTypes.STRING);
         this.value = value;
     }
 

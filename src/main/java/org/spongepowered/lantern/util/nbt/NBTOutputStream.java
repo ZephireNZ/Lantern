@@ -67,7 +67,7 @@ public final class NBTOutputStream implements Closeable {
         TagType type = tag.getType();
         byte[] nameBytes = name.getBytes(StandardCharsets.UTF_8);
 
-        if (type == TagType.END) {
+        if (type == TagTypes.END) {
             throw new IOException("Named TAG_End not permitted.");
         }
 
@@ -88,44 +88,46 @@ public final class NBTOutputStream implements Closeable {
         TagType type = tag.getType();
         byte[] bytes;
 
-        switch (type) {
-            case BYTE:
+        switch (type.getId()) {
+            case 0:
+                break;
+            case 1:
                 os.writeByte((byte) tag.getValue());
                 break;
 
-            case SHORT:
+            case 2:
                 os.writeShort((short) tag.getValue());
                 break;
 
-            case INT:
+            case 3:
                 os.writeInt((int) tag.getValue());
                 break;
 
-            case LONG:
+            case 4:
                 os.writeLong((long) tag.getValue());
                 break;
 
-            case FLOAT:
+            case 5:
                 os.writeFloat((float) tag.getValue());
                 break;
 
-            case DOUBLE:
+            case 6:
                 os.writeDouble((double) tag.getValue());
                 break;
 
-            case BYTE_ARRAY:
+            case 7:
                 bytes = (byte[]) tag.getValue();
                 os.writeInt(bytes.length);
                 os.write(bytes);
                 break;
 
-            case STRING:
+            case 8:
                 bytes = ((StringTag) tag).getValue().getBytes(StandardCharsets.UTF_8);
                 os.writeShort(bytes.length);
                 os.write(bytes);
                 break;
 
-            case LIST:
+            case 9:
                 ListTag<Tag> listTag = (ListTag<Tag>) tag;
                 List<Tag> tags = listTag.getValue();
 
@@ -136,7 +138,7 @@ public final class NBTOutputStream implements Closeable {
                 }
                 break;
 
-            case COMPOUND:
+            case 10:
                 Map<String, Tag> map = ((CompoundTag) tag).getValue();
                 for (Map.Entry<String, Tag> entry : map.entrySet()) {
                     writeTag(entry.getKey(), entry.getValue());
@@ -144,7 +146,7 @@ public final class NBTOutputStream implements Closeable {
                 os.writeByte((byte) 0); // end tag
                 break;
 
-            case INT_ARRAY:
+            case 11:
                 int[] ints = (int[]) tag.getValue();
                 os.writeInt(ints.length);
                 for (int value : ints) {

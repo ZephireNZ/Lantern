@@ -3,7 +3,7 @@ package org.spongepowered.lantern.util.nbt;
 /**
  * The {@code TAG_Byte_Array} tag.
  */
-final class ByteArrayTag extends Tag<byte[]> {
+public final class ByteArrayTag extends Tag<byte[]> {
 
     /**
      * The value.
@@ -15,7 +15,7 @@ final class ByteArrayTag extends Tag<byte[]> {
      * @param value The value.
      */
     public ByteArrayTag(byte[] value) {
-        super(TagType.BYTE_ARRAY);
+        super(TagTypes.BYTE_ARRAY);
         this.value = value;
     }
 

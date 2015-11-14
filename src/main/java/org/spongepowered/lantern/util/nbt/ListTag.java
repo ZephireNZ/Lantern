@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * The {@code TAG_List} tag.
  */
-final class ListTag<T extends Tag> extends Tag<List<T>> {
+public final class ListTag<T extends Tag> extends Tag<List<T>> {
 
     /**
      * The type of entries within this list.
@@ -24,7 +24,7 @@ final class ListTag<T extends Tag> extends Tag<List<T>> {
      * @param value The value.
      */
     public ListTag(TagType type, List<T> value) {
-        super(TagType.LIST);
+        super(TagTypes.LIST);
         this.type = type;
         this.value = new ArrayList<>(value); // modifying list should not modify tag
 
