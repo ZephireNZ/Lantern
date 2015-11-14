@@ -3,7 +3,7 @@ package org.spongepowered.lantern.io;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.lantern.io.entity.LanternPlayer;
+import org.spongepowered.lantern.entity.LanternPlayer;
 
 import java.util.Collection;
 import java.util.UUID;

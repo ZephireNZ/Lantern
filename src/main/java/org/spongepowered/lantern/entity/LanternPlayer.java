@@ -1,4 +1,4 @@
-package org.spongepowered.lantern.io.entity;
+package org.spongepowered.lantern.entity;
 
 import org.spongepowered.api.entity.living.player.Player;
 

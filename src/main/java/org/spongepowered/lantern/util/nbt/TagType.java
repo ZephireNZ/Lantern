@@ -1,37 +1,45 @@
 package org.spongepowered.lantern.util.nbt;
 
-import java.lang.reflect.Constructor;
+import java.io.IOException;
+
+import javax.annotation.Nullable;
 
 /**
  * The types of NBT tags that exist.
  */
-public class TagType<V, T> {
+public enum TagType {
 
-    private final byte id;
-    private final String name;
-    private Class<V> valueClass;
-    private final Class<T> tagClass;
+    END,
+    BYTE,
+    SHORT,
+    INT,
+    LONG,
+    FLOAT,
+    DOUBLE,
+    BYTE_ARRAY,
+    STRING,
+    LIST,
+    COMPOUND,
+    INT_ARRAY;
 
-    public TagType(byte id, String name, Class<V> valueClass, Class<T> tagClass) {
-        this.id = id;
-        this.name = name;
-        this.valueClass = valueClass;
-        this.tagClass = tagClass;
+    TagType() {
     }
 
     public byte getId() {
-        return this.id;
+        return (byte) ordinal();
     }
 
-    public String getName() {
-        return name;
+    public static @Nullable TagType byId(int id) {
+        if (id < 0 || id >= values().length) return null;
+        return values()[id];
     }
 
-    public Class<T> getTagClass() {
-        return tagClass;
-    }
-
-    public Constructor<T> getConstructor() throws NoSuchMethodException {
-        return tagClass.getConstructor(valueClass);
+    static TagType byIdOrError(int id) throws IOException {
+        TagType ret = byId(id);
+        if (ret == null) {
+            throw new IOException("Invalid Tag Type");
+        } else {
+            return ret;
+        }
     }
 }
