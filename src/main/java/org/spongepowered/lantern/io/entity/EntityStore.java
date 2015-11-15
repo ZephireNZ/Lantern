@@ -1,11 +1,11 @@
 package org.spongepowered.lantern.io.entity;
 
+import static org.spongepowered.lantern.data.util.DataQueries.*;
+
+import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.lantern.entity.LanternEntity;
-import org.spongepowered.lantern.io.nbt.NbtSerialization;
-import org.spongepowered.lantern.util.nbt.CompoundTag;
-import org.spongepowered.lantern.util.nbt.TagType;
 
 import java.util.UUID;
 
@@ -37,7 +37,7 @@ abstract class EntityStore<T extends LanternEntity> {
      * @param compound The entity's tag, if extra data is needed.
      * @return The new entity.
      */
-    public abstract T createEntity(Location<World> location, CompoundTag compound);
+    public abstract T createEntity(Location<World> location, DataView compound);
 
     // For information on the NBT tags loaded here and elsewhere:
     // http://minecraft.gamepedia.com/Chunk_format#Entity_Format
@@ -53,7 +53,7 @@ abstract class EntityStore<T extends LanternEntity> {
      * @param entity The target entity.
      * @param tag The entity's tag.
      */
-    public void load(T entity, CompoundTag tag) {
+    public void load(T entity, DataView tag) {
         // id, world, and location are handled by EntityStore
         // base stuff for all entities is here:
 
@@ -86,8 +86,8 @@ abstract class EntityStore<T extends LanternEntity> {
      * @param entity The entity to save.
      * @param tag The target tag.
      */
-    public void save(T entity, CompoundTag tag) {
-        tag.putString("id", id);
+    public void save(T entity, DataView tag) {
+        tag.set(ENTITY_ID, id);
 
         //TODO: Implement
 

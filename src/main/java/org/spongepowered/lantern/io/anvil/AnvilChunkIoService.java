@@ -1,16 +1,22 @@
 package org.spongepowered.lantern.io.anvil;
 
+import static org.spongepowered.api.data.DataQuery.of;
+import static org.spongepowered.lantern.data.util.DataQueries.*;
+import static org.spongepowered.lantern.util.DataUtils.getByteArray;
+import static org.spongepowered.lantern.util.DataUtils.getIntArray;
+
 import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.block.tileentity.TileEntity;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.lantern.Sponge;
 import org.spongepowered.lantern.block.tileentity.LanternTileEntity;
 import org.spongepowered.lantern.entity.LanternEntity;
 import org.spongepowered.lantern.io.entity.EntityStorage;
 import org.spongepowered.lantern.util.NibbleArray;
-import org.spongepowered.lantern.util.nbt.CompoundTag;
-import org.spongepowered.lantern.util.nbt.NBTInputStream;
-import org.spongepowered.lantern.util.nbt.NBTOutputStream;
-import org.spongepowered.lantern.util.nbt.TagType;
+import org.spongepowered.lantern.util.nbt.NbtDataInputStream;
+import org.spongepowered.lantern.util.nbt.NbtDataOutputStream;
 import org.spongepowered.lantern.world.LanternChunk;
 import org.spongepowered.lantern.world.LanternChunk.ChunkSection;
 import org.spongepowered.lantern.io.ChunkIoService;
@@ -63,22 +69,22 @@ public final class AnvilChunkIoService implements ChunkIoService {
 
         DataInputStream in = region.getChunkDataInputStream(regionX, regionZ);
 
-        CompoundTag levelTag;
-        try (NBTInputStream nbt = new NBTInputStream(in, false)) {
-            CompoundTag root = nbt.readCompound();
-            levelTag = root.getCompound("Level");
+        DataView levelTag;
+        try (NbtDataInputStream nbt = new NbtDataInputStream(in, false)) {
+            DataContainer root = nbt.read();
+            levelTag = root.getView(LEVEL).get();
         }
 
         // read the vertical sections
-        List<CompoundTag> sectionList = levelTag.getCompoundList("Sections");
+        List<DataView> sectionList = levelTag.getViewList(SECTIONS).get();
         ChunkSection[] sections = new ChunkSection[16];
-        for (CompoundTag sectionTag : sectionList) {
-            int y = sectionTag.getByte("Y");
-            byte[] rawTypes = sectionTag.getByteArray("Blocks");
-            NibbleArray extTypes = sectionTag.containsKey("Add") ? new NibbleArray(sectionTag.getByteArray("Add")) : null;
-            NibbleArray data = new NibbleArray(sectionTag.getByteArray("Data"));
-            NibbleArray blockLight = new NibbleArray(sectionTag.getByteArray("BlockLight"));
-            NibbleArray skyLight = new NibbleArray(sectionTag.getByteArray("SkyLight"));
+        for (DataView sectionTag : sectionList) {
+            int y = sectionTag.getInt(SECTION_Y).get();
+            byte[] rawTypes = getByteArray(sectionTag, BLOCKS);
+            NibbleArray extTypes = sectionTag.contains(ADD) ? new NibbleArray(getByteArray(sectionTag, ADD)) : null;
+            NibbleArray data = new NibbleArray(getByteArray(sectionTag, DATA));
+            NibbleArray blockLight = new NibbleArray(getByteArray(sectionTag, BLOCK_LIGHT));
+            NibbleArray skyLight = new NibbleArray(getByteArray(sectionTag, SKY_LIGHT));
 
             char[] types = new char[rawTypes.length];
             for (int i = 0; i < rawTypes.length; i++) {
@@ -89,27 +95,29 @@ public final class AnvilChunkIoService implements ChunkIoService {
 
         // initialize the chunk
         chunk.initializeSections(sections);
-        chunk.setPopulated(levelTag.getBool("TerrainPopulated"));
+        chunk.setPopulated(levelTag.getBoolean(TERRAIN_POPULATED).get());
 
         // read biomes
-        if (levelTag.isByteArray("Biomes")) {
-            chunk.setBiomes(levelTag.getByteArray("Biomes"));
+        if (levelTag.contains(BIOMES)) {
+            chunk.setBiomes(getByteArray(levelTag, BIOMES));
         }
         // read height map
-        if (levelTag.isIntArray("HeightMap")) {
-            chunk.setHeightMap(levelTag.getIntArray("HeightMap"));
+        if (levelTag.contains(HEIGHT_MAP)) {
+            chunk.setHeightMap(getIntArray(levelTag, HEIGHT_MAP));
         } else {
             chunk.automaticHeightMap();
         }
 
         // read entities
-        if (levelTag.isList("Entities", TagType.COMPOUND)) {
-            for (CompoundTag entityTag : levelTag.getCompoundList("Entities")) {
+        //TODO: Rewrite
+        if (levelTag.contains(ENTITIES)) {
+            for (DataView entityTag : levelTag.getViewList(ENTITIES).get()) {
+                //TODO: Use serializable?
                 try {
                     // note that creating the entity is sufficient to add it to the world
                     EntityStorage.loadEntity(chunk.getWorld(), entityTag);
                 } catch (Exception e) {
-                    String id = entityTag.isString("id") ? entityTag.getString("id") : "<missing>";
+                    String id = entityTag.getString(ENTITY_ID).orElse("<missing>");
                     if (e.getMessage() != null && e.getMessage().startsWith("Unknown entity type to load:")) {
                         Sponge.getLogger().warn("Unknown entity in " + chunk + ": " + id);
                     } else {
@@ -120,21 +128,23 @@ public final class AnvilChunkIoService implements ChunkIoService {
         }
 
         // read tile entities
-        List<CompoundTag> storedTileEntities = levelTag.getCompoundList("TileEntities");
-        for (CompoundTag tileEntityTag : storedTileEntities) {
-            int tx = tileEntityTag.getInt("x");
-            int ty = tileEntityTag.getInt("y");
-            int tz = tileEntityTag.getInt("z");
+        List<DataView> storedTileEntities = levelTag.getViewList(TILE_ENTITIES).get();
+        for (DataView tileEntityTag : storedTileEntities) {
+            int tx = tileEntityTag.getInt(of("x")).get();
+            int ty = tileEntityTag.getInt(of("y")).get();
+            int tz = tileEntityTag.getInt(of("z")).get();
+
+            //TODO: Rewrite?
             Optional<TileEntity> tileEntity = chunk.getTileEntity(tx & 0xf, ty, tz & 0xf);
             if (tileEntity.isPresent()) {
                 try {
                     ((LanternTileEntity) tileEntity.get()).loadNbt(tileEntityTag);
                 } catch (Exception ex) {
-                    String id = tileEntityTag.isString("id") ? tileEntityTag.getString("id") : "<missing>";
+                    String id = tileEntityTag.getString(ENTITY_ID).orElse("<missing>");
                     Sponge.getLogger().error("Error loading tile entity at " + tileEntity.get().getLocation().getBlockPosition() + ": " + id, ex);
                 }
             } else {
-                String id = tileEntityTag.isString("id") ? tileEntityTag.getString("id") : "<missing>";
+                String id = tileEntityTag.getString(ENTITY_ID).orElse("<missing>");
                 Sponge.getLogger().warn("Unknown tile entity at " + chunk.getWorld().getName() + "," + tx + "," + ty + "," + tz + ": " + id);
             }
         }
@@ -155,24 +165,24 @@ public final class AnvilChunkIoService implements ChunkIoService {
         int regionX = x & (REGION_SIZE - 1);
         int regionZ = z & (REGION_SIZE - 1);
 
-        CompoundTag levelTags = new CompoundTag();
+        DataContainer levelTags = new MemoryDataContainer();
 
         // core properties
-        levelTags.putInt("xPos", x);
-        levelTags.putInt("zPos", z);
-        levelTags.putBool("TerrainPopulated", chunk.isPopulated());
-        levelTags.putLong("LastUpdate", 0);
+        levelTags.set(of("xPos"), x);
+        levelTags.set(of("zPos"), z);
+        levelTags.set(TERRAIN_POPULATED, chunk.isPopulated());
+        levelTags.set(of("LastUpdate"), 0);
 
         // chunk sections
-        List<CompoundTag> sectionTags = new ArrayList<>();
+        List<DataView> sectionTags = new ArrayList<>();
         LanternChunk snapshot = chunk.snapshot(true, true);
         ChunkSection[] sections = snapshot.getRawSections();
         for (byte i = 0; i < sections.length; ++i) {
             ChunkSection sec = sections[i];
             if (sec == null) continue;
 
-            CompoundTag sectionTag = new CompoundTag();
-            sectionTag.putByte("Y", i);
+            DataView sectionTag = new MemoryDataContainer();
+            sectionTag.set(SECTION_Y, i);
 
             byte[] rawTypes = new byte[sec.types.length];
             NibbleArray extTypes = null;
@@ -188,56 +198,56 @@ public final class AnvilChunkIoService implements ChunkIoService {
                 }
                 data.set(j, (byte) (sec.types[j] & 0xF));
             }
-            sectionTag.putByteArray("Blocks", rawTypes);
+            sectionTag.set(BLOCKS, rawTypes);
             if (extTypes != null) {
-                sectionTag.putByteArray("Add", extTypes.getRawData());
+                sectionTag.set(ADD, extTypes.getRawData());
             }
-            sectionTag.putByteArray("Data", data.getRawData());
-            sectionTag.putByteArray("BlockLight", sec.blockLight.getRawData());
-            sectionTag.putByteArray("SkyLight", sec.skyLight.getRawData());
+            sectionTag.set(DATA, data.getRawData());
+            sectionTag.set(BLOCK_LIGHT, sec.blockLight.getRawData());
+            sectionTag.set(SKY_LIGHT, sec.skyLight.getRawData());
 
             sectionTags.add(sectionTag);
         }
-        levelTags.putCompoundList("Sections", sectionTags);
+        levelTags.set(SECTIONS, sectionTags);
 
         // height map and biomes
-        levelTags.putIntArray("HeightMap", snapshot.getRawHeightmap());
-        levelTags.putByteArray("Biomes", snapshot.getRawBiomes());
+        levelTags.set(HEIGHT_MAP, snapshot.getRawHeightmap());
+        levelTags.set(BIOMES, snapshot.getRawBiomes());
 
         // entities
-        List<CompoundTag> entities = new ArrayList<>();
+        List<DataView> entities = new ArrayList<>();
         for (LanternEntity entity : chunk.getRawEntities()) {
             if (!entity.shouldSave()) {
                 continue;
             }
             try {
-                CompoundTag tag = new CompoundTag();
+                DataView tag = new MemoryDataContainer();
                 EntityStorage.save(entity, tag);
                 entities.add(tag);
             } catch (Exception e) {
                 Sponge.getLogger().warn("Error saving " + entity + " in " + chunk, e);
             }
         }
-        levelTags.putCompoundList("Entities", entities);
+        levelTags.set(ENTITIES, entities);
 
         // tile entities
-        List<CompoundTag> tileEntities = new ArrayList<>();
+        List<DataView> tileEntities = new ArrayList<>();
         for (LanternTileEntity entity : chunk.getRawTileEntities()) {
             try {
-                CompoundTag tag = new CompoundTag();
+                DataView tag = new MemoryDataContainer();
                 entity.saveNbt(tag);
                 tileEntities.add(tag);
             } catch (Exception ex) {
                 Sponge.getLogger().error("Error saving tile entity at " + entity.getBlock(), ex);
             }
         }
-        levelTags.putCompoundList("TileEntities", tileEntities);
+        levelTags.set(TILE_ENTITIES, tileEntities);
 
-        CompoundTag levelOut = new CompoundTag();
-        levelOut.putCompound("Level", levelTags);
+        DataView levelOut = new MemoryDataContainer();
+        levelOut.set(LEVEL, levelTags);
 
-        try (NBTOutputStream nbt = new NBTOutputStream(region.getChunkDataOutputStream(regionX, regionZ), false)) {
-            nbt.writeTag(levelOut);
+        try (NbtDataOutputStream nbt = new NbtDataOutputStream(region.getChunkDataOutputStream(regionX, regionZ), false)) {
+            nbt.write(levelOut);
         }
     }
 

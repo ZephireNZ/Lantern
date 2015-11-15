@@ -7,6 +7,7 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -27,7 +28,7 @@ public abstract class LanternDataHolder implements DataHolder {
         this.containerStore = Preconditions.checkNotNull(containerStore);
     }
 
-    public LanternDataHolder(DataContainer container) {
+    public LanternDataHolder(DataView container) {
         //TODO: Implement
     }
 

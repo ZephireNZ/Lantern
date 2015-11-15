@@ -1,15 +1,21 @@
 package org.spongepowered.lantern.block.tileentity;
 
 import org.spongepowered.api.block.tileentity.TileEntity;
-import org.spongepowered.lantern.util.nbt.CompoundTag;
+import org.spongepowered.api.data.DataView;
+import org.spongepowered.lantern.data.LanternDataHolder;
 
-public abstract class LanternTileEntity implements TileEntity {
+public abstract class LanternTileEntity extends LanternDataHolder implements TileEntity {
 
-    public void loadNbt(CompoundTag tileEntityTag) {
+    public LanternTileEntity(DataView dataView) {
+        super(dataView);
+        //TODO: Implement
+    }
+
+    public void loadNbt(DataView tileEntityTag) {
         // TODO: Implement
     }
 
-    public void saveNbt(CompoundTag tag) {
+    public void saveNbt(DataView tag) {
         // TODO: Implement
     }
 

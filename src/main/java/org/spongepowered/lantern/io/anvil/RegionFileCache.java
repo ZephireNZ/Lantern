@@ -27,7 +27,7 @@ package org.spongepowered.lantern.io.anvil;
  * Some changes have been made as part of the Glowstone project.
  */
 
-import org.spongepowered.lantern.GlowServer;
+import org.spongepowered.lantern.Sponge;
 
 import java.io.File;
 import java.io.IOException;
@@ -64,7 +64,7 @@ public class RegionFileCache {
         }
 
         if (!regionDir.isDirectory() && !regionDir.mkdirs()) {
-            GlowServer.logger.warning("Failed to create directory: " + regionDir);
+            Sponge.getLogger().warn("Failed to create directory: " + regionDir);
         }
 
         if (cache.size() >= MAX_CACHE_SIZE) {

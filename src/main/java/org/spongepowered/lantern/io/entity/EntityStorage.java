@@ -1,10 +1,12 @@
 package org.spongepowered.lantern.io.entity;
 
+import static org.spongepowered.lantern.data.util.DataQueries.*;
+
+import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.lantern.entity.LanternEntity;
 import org.spongepowered.lantern.io.nbt.NbtSerialization;
-import org.spongepowered.lantern.util.nbt.CompoundTag;
 import org.spongepowered.lantern.world.LanternWorld;
 
 import java.util.HashMap;
@@ -68,14 +70,14 @@ public final class EntityStorage {
      * @return The newly constructed entity.
      * @throws IllegalArgumentException if there is an error in the data.
      */
-    public static LanternEntity loadEntity(LanternWorld world, CompoundTag compound) {
+    public static LanternEntity loadEntity(LanternWorld world, DataView compound) {
         // look up the store by the tag's id
-        if (!compound.isString("id")) {
+        if (!compound.contains(ENTITY_ID)) {
             throw new IllegalArgumentException("Entity has no type");
         }
-        EntityStore<?> store = idTable.get(compound.getString("id"));
+        EntityStore<?> store = idTable.get(compound.getString(ENTITY_ID).get());
         if (store == null) {
-            throw new IllegalArgumentException("Unknown entity type to load: \"" + compound.getString("id") + "\"");
+            throw new IllegalArgumentException("Unknown entity type to load: \"" + compound.getString(ENTITY_ID) + "\"");
         }
 
         // verify that, if the tag contains a world, it's correct
@@ -97,7 +99,7 @@ public final class EntityStorage {
     /**
      * Helper method to call EntityStore methods for type safety.
      */
-    private static <T extends LanternEntity> T createEntity(EntityStore<T> store, Location location, CompoundTag compound) {
+    private static <T extends LanternEntity> T createEntity(EntityStore<T> store, Location<World> location, DataView compound) {
         T entity = store.createEntity(location, compound);
         store.load(entity, compound);
         return entity;
@@ -128,7 +130,7 @@ public final class EntityStorage {
      * @param entity The entity to save.
      * @param compound The target tag.
      */
-    public static void save(LanternEntity entity, CompoundTag compound) {
+    public static void save(LanternEntity entity, DataView compound) {
         // look up the store for the entity
         EntityStore<?> store = find(entity.getClass(), "save");
 
@@ -141,7 +143,7 @@ public final class EntityStorage {
      * @param entity The target entity.
      * @param compound The tag to load from.
      */
-    public static void load(LanternEntity entity, CompoundTag compound) {
+    public static void load(LanternEntity entity, DataView compound) {
         // look up the store for the entity
         EntityStore<?> store = find(entity.getClass(), "load");
 

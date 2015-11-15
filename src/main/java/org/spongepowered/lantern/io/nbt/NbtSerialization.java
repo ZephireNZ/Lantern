@@ -1,15 +1,11 @@
 package org.spongepowered.lantern.io.nbt;
 
+import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.lantern.util.nbt.CompoundTag;
-import org.spongepowered.lantern.util.nbt.TagType;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 import java.util.Vector;
 
 /**
@@ -25,7 +21,7 @@ public final class NbtSerialization {
      * @param tag The tag to read from.
      * @return The resulting ItemStack, or null.
      */
-    public static ItemStack readItem(CompoundTag tag) {
+    public static ItemStack readItem(DataView tag) {
 //        final Material material;
 //        if (tag.isString("id")) {
 //            material = ItemIds.getItem(tag.getString("id"));
@@ -55,7 +51,7 @@ public final class NbtSerialization {
      * @param slot The slot, or negative to omit.
      * @return The resulting tag.
      */
-    public static CompoundTag writeItem(ItemStack stack, int slot) {
+    public static DataView writeItem(ItemStack stack, int slot) {
 //        CompoundTag tag = new CompoundTag();
 //        if (stack == null || stack.getType() == Material.AIR) {
 //            return tag;
@@ -81,7 +77,7 @@ public final class NbtSerialization {
      * @param size The desired size of the inventory.
      * @return An array with the contents of the inventory.
      */
-    public static ItemStack[] readInventory(List<CompoundTag> tagList, int start, int size) {
+    public static ItemStack[] readInventory(List<DataView> tagList, int start, int size) {
 //        ItemStack[] items = new ItemStack[size];
 //        for (CompoundTag tag : tagList) {
 //            byte slot = tag.isByte("Slot") ? tag.getByte("Slot") : 0;
@@ -99,7 +95,7 @@ public final class NbtSerialization {
      * @param start The slot number to consider the inventory's start.
      * @return The list of CompoundTags.
      */
-    public static List<CompoundTag> writeInventory(ItemStack[] items, int start) {
+    public static List<DataView> writeInventory(ItemStack[] items, int start) {
 //        List<CompoundTag> out = new ArrayList<>();
 //        for (int i = 0; i < items.length; i++) {
 //            ItemStack stack = items[i];
@@ -116,7 +112,7 @@ public final class NbtSerialization {
      * @param compound The tag to read the world from.
      * @return The world, or null if none could be found.
      */
-    public static World readWorld(CompoundTag compound) {
+    public static World readWorld(DataView compound) {
         return null; //TODO: Implement
 //        World world = null;
 //        if (compound.isLong("WorldUUIDLeast") && compound.isLong("WorldUUIDMost")) {
@@ -145,7 +141,7 @@ public final class NbtSerialization {
      * @param world The world to identify.
      * @param compound The tag to write to.
      */
-    public static void writeWorld(World world, CompoundTag compound) {
+    public static void writeWorld(World world, DataView compound) {
 //        UUID worldUUID = world.getUID();
 //        // world UUID used by Bukkit and code above
 //        compound.putLong("WorldUUIDMost", worldUUID.getMostSignificantBits());
@@ -163,7 +159,7 @@ public final class NbtSerialization {
      * @param tag The tag to read from.
      * @return The location, or null.
      */
-    public static Location<World> listTagsToLocation(World world, CompoundTag tag) {
+    public static Location<World> listTagsToLocation(World world, DataView tag) {
 //        // check for position list
 //        if (tag.isList("Pos", TagType.DOUBLE)) {
 //            List<Double> pos = tag.getList("Pos", TagType.DOUBLE);
@@ -193,7 +189,7 @@ public final class NbtSerialization {
      * @param loc The location to write.
      * @param tag The tag to write to.
      */
-    public static void locationToListTags(Location<World> loc, CompoundTag tag) {
+    public static void locationToListTags(Location<World> loc, DataView tag) {
 //        tag.putList("Pos", TagType.DOUBLE, Arrays.asList(loc.getX(), loc.getY(), loc.getZ()));
 //        tag.putList("Rotation", TagType.FLOAT, Arrays.asList(loc.getYaw(), loc.getPitch()));
         //TODO: Implement
