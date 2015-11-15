@@ -33,7 +33,6 @@ import com.sun.istack.internal.Nullable;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.scheduler.SchedulerService;
 import org.spongepowered.api.service.scheduler.Task;
-import org.spongepowered.api.service.scheduler.TaskBuilder;
 import org.spongepowered.lantern.Sponge;
 
 import java.util.Iterator;
@@ -64,7 +63,7 @@ public class LanternScheduler implements SchedulerService {
     }
 
     @Override
-    public TaskBuilder createTaskBuilder() {
+    public Task.Builder createTaskBuilder() {
         return new SpongeTaskBuilder();
     }
 

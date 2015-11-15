@@ -31,10 +31,6 @@ import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.ImmutableDataRegistry;
 import org.spongepowered.api.data.manipulator.DataManipulatorRegistry;
-import org.spongepowered.api.data.type.Career;
-import org.spongepowered.api.data.type.Profession;
-import org.spongepowered.api.effect.particle.ParticleEffectBuilder;
-import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.recipe.RecipeRegistry;
@@ -49,6 +45,7 @@ import org.spongepowered.api.statistic.TeamStatistic;
 import org.spongepowered.api.status.Favicon;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.api.world.extent.ExtentBufferFactory;
 import org.spongepowered.api.world.gen.PopulatorFactory;
@@ -77,17 +74,7 @@ public class LanternGameRegistry implements GameRegistry {
     }
 
     @Override
-    public <T> T createBuilder(Class<T> builderClass) throws IllegalArgumentException {
-        return null; //TODO: Implement
-    }
-
-    @Override
-    public ParticleEffectBuilder createParticleEffectBuilder(ParticleType particle) {
-        return null; //TODO: Implement
-    }
-
-    @Override
-    public Collection<Career> getCareers(Profession profession) {
+    public <T extends ResettableBuilder<? super T>> T createBuilder(Class<T> builderClass) throws IllegalArgumentException {
         return null; //TODO: Implement
     }
 
