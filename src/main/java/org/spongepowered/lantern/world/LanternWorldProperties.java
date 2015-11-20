@@ -124,6 +124,12 @@ public class LanternWorldProperties implements WorldProperties {
         this.gamerules = new HashMap<>(); //TODO: Default gamerules
         this.generatorSettings = new MemoryDataContainer();
 
+        this.spongeRootData = new MemoryDataContainer();
+        this.rootData = new MemoryDataContainer();
+        this.spongeData = spongeRootData.createView(SPONGE_DATA);
+        this.levelData = rootData.createView(LEVEL_DATA);
+        this.playerUniqueData = Lists.newArrayList();
+
     }
 
     public LanternWorldProperties(WorldCreationSettings settings) {
@@ -166,6 +172,7 @@ public class LanternWorldProperties implements WorldProperties {
             this.playerUniqueData.add(valueNbt);
             iterator.remove();
         }
+        this.spongeData.set(SPONGE_PLAYER_UUID_TABLE, playerUniqueData);
     }
 
     private void updateVanillaData() {
