@@ -66,6 +66,12 @@ import java.util.function.Predicate;
 
 public class LanternWorld implements World {
 
+    public LanternWorld(WorldCreationSettings settings) {
+//        this.name = settings.getWorldName();
+//        this.dimension = settings.getDimensionType();
+//        this.
+    }
+
     @Override
     public Difficulty getDifficulty() {
         return null; //TODO: Implement
@@ -172,7 +178,7 @@ public class LanternWorld implements World {
     }
 
     @Override
-    public WorldProperties getProperties() {
+    public LanternWorldProperties getProperties() {
         return null; //TODO: Implement
     }
 
@@ -714,5 +720,21 @@ public class LanternWorld implements World {
     @Override
     public void forecast(Weather weather, long duration) {
         //TODO: Implement
+    }
+
+    public void setTime(long time) {
+        // TODO: Implement
+    }
+
+    public void setFullTime(long time) {
+        // TODO: Implement
+    }
+
+    public void setSpawnLocation(int x, int y, int z) {
+        // TODO: Implement
+    }
+
+    public void setGameRule(String rule, String value) {
+        // TODO: Implement
     }
 }

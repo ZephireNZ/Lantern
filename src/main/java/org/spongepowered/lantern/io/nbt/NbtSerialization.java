@@ -13,6 +13,8 @@ import java.util.Vector;
  */
 public final class NbtSerialization {
 
+    //TODO: Remove?
+
     private NbtSerialization() {
     }
 

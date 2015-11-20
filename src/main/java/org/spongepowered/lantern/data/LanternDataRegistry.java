@@ -9,6 +9,16 @@ import java.util.Optional;
 
 public class LanternDataRegistry implements DataManipulatorRegistry {
 
+    private static final LanternDataRegistry instance = new LanternDataRegistry();
+
+    private LanternDataRegistry() {
+    }
+
+
+    public static LanternDataRegistry getInstance() {
+        return LanternDataRegistry.instance;
+    }
+
     @Override
     public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void register(Class<? extends T> manipulatorClass, Class<? extends I> immutableManipulatorClass, DataManipulatorBuilder<T, I> builder) {
         //TODO: Implement

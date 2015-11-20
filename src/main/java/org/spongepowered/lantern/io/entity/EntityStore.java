@@ -7,8 +7,6 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.lantern.entity.LanternEntity;
 
-import java.util.UUID;
-
 /**
  * The base for entity store classes.
  * @param <T> The type of entity being stored.

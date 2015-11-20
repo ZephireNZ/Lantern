@@ -1,15 +1,17 @@
 package org.spongepowered.lantern.io.anvil;
 
 import static org.spongepowered.api.data.DataQuery.of;
-import static org.spongepowered.lantern.data.util.DataQueries.*;
+import static org.spongepowered.lantern.data.util.DataQueries.ENTITY_ID;
 import static org.spongepowered.lantern.util.DataUtils.getByteArray;
 import static org.spongepowered.lantern.util.DataUtils.getIntArray;
 
 import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.data.Queries;
 import org.spongepowered.lantern.Sponge;
 import org.spongepowered.lantern.block.tileentity.LanternTileEntity;
 import org.spongepowered.lantern.entity.LanternEntity;
@@ -33,6 +35,19 @@ import java.util.Optional;
  * an improvement on the McRegion file format.
  */
 public final class AnvilChunkIoService implements ChunkIoService {
+
+    public static final DataQuery LEVEL = of("Level");
+    public static final DataQuery SECTIONS = of("Sections");
+    public static final DataQuery BLOCKS = of("Blocks");
+    public static final DataQuery ADD = of("Add");
+    public static final DataQuery BLOCK_DATA = of("Data");
+    public static final DataQuery BLOCK_LIGHT = of("BlockLight");
+    public static final DataQuery SKY_LIGHT = of("SkyLight");
+    public static final DataQuery TERRAIN_POPULATED = of("TerrainPopulated");
+    public static final DataQuery BIOMES = of("Biomes");
+    public static final DataQuery HEIGHT_MAP = of("HeightMap");
+    public static final DataQuery ENTITIES = of("Entities");
+    public static final DataQuery TILE_ENTITIES = of("TileEntities");
 
     /**
      * The size of a region - a 32x32 group of chunks.
@@ -79,10 +94,10 @@ public final class AnvilChunkIoService implements ChunkIoService {
         List<DataView> sectionList = levelTag.getViewList(SECTIONS).get();
         ChunkSection[] sections = new ChunkSection[16];
         for (DataView sectionTag : sectionList) {
-            int y = sectionTag.getInt(SECTION_Y).get();
+            int y = sectionTag.getInt(Queries.POSITION_Y).get();
             byte[] rawTypes = getByteArray(sectionTag, BLOCKS);
             NibbleArray extTypes = sectionTag.contains(ADD) ? new NibbleArray(getByteArray(sectionTag, ADD)) : null;
-            NibbleArray data = new NibbleArray(getByteArray(sectionTag, DATA));
+            NibbleArray data = new NibbleArray(getByteArray(sectionTag, BLOCK_DATA));
             NibbleArray blockLight = new NibbleArray(getByteArray(sectionTag, BLOCK_LIGHT));
             NibbleArray skyLight = new NibbleArray(getByteArray(sectionTag, SKY_LIGHT));
 
@@ -182,7 +197,7 @@ public final class AnvilChunkIoService implements ChunkIoService {
             if (sec == null) continue;
 
             DataView sectionTag = new MemoryDataContainer();
-            sectionTag.set(SECTION_Y, i);
+            sectionTag.set(Queries.POSITION_Y, i);
 
             byte[] rawTypes = new byte[sec.types.length];
             NibbleArray extTypes = null;
@@ -202,7 +217,7 @@ public final class AnvilChunkIoService implements ChunkIoService {
             if (extTypes != null) {
                 sectionTag.set(ADD, extTypes.getRawData());
             }
-            sectionTag.set(DATA, data.getRawData());
+            sectionTag.set(BLOCK_DATA, data.getRawData());
             sectionTag.set(BLOCK_LIGHT, sec.blockLight.getRawData());
             sectionTag.set(SKY_LIGHT, sec.skyLight.getRawData());
 
