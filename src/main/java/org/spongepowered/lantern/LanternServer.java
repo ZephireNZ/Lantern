@@ -25,17 +25,25 @@
 package org.spongepowered.lantern;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.service.world.ChunkLoadService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.util.command.source.ConsoleSource;
+import org.spongepowered.api.world.DimensionTypes;
+import org.spongepowered.api.world.GeneratorType;
+import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.WorldBuilder;
 import org.spongepowered.api.world.WorldCreationSettings;
 import org.spongepowered.api.world.storage.ChunkLayout;
 import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.lantern.configuration.LanternConfig;
 import org.spongepowered.lantern.launch.console.ConsoleManager;
 
 import java.net.InetSocketAddress;
@@ -51,6 +59,7 @@ public class LanternServer implements Server {
     private final ConsoleManager consoleManager = new ConsoleManager();
 
     public LanternServer() {
+        //TODO: Commandline Args?
         //TODO: Get Ops, whitelist, bans
 
         start();
@@ -61,11 +70,54 @@ public class LanternServer implements Server {
         consoleManager.startConsole();
         consoleManager.startFile("latest.log"); //TODO: proper logging
 
+        //TODO: Fire AboutToStart
+
         //TODO: Load Ops, whitelist, bans
 
         //TODO: Load worlds
+        loadAllWorlds();
 
         //TODO: Start schedulers
+    }
+
+    public void loadAllWorlds() {
+        GameRegistry registry = Sponge.getRegistry();
+        WorldBuilder builder = registry.createBuilder(WorldBuilder.class);
+        LanternConfig.GlobalConfig config = Sponge.getGlobalConfig().getConfig();
+
+        GeneratorType generatorType = registry.getType(GeneratorType.class, config.getLevelType()).orElse(GeneratorTypes.OVERWORLD);
+        GameMode gameMode = registry.getType(GameMode.class, config.getGamemode()).orElse(GameModes.SURVIVAL);
+
+
+        try {
+            builder.seed(Long.parseLong(config.getLevelSeed()));
+        } catch (NumberFormatException ignored) {}
+
+        builder.name(config.getLevelName())
+                .enabled(true)
+                .loadsOnStartup(true)
+                .keepsSpawnLoaded(true)
+                .gameMode(gameMode)
+                .generator(generatorType)
+                //TODO: Modifiers?
+                .dimensionType(DimensionTypes.OVERWORLD)
+                .usesMapFeatures(config.getWorld().isGenerateStructures())
+                .hardcore(config.getWorld().isHardcore())
+//                .generatorSettings(config.getWorld().getGeneratorSettings()) TODO: Mojangson
+                //TODO: TeleporterAgent?
+                .build();
+
+        builder.name("DIM-1")
+                .enabled(true)
+                .loadsOnStartup(true)
+                .keepsSpawnLoaded(false)
+                .gameMode(gameMode)
+                .generator(GeneratorTypes.NETHER)
+                .dimensionType(DimensionTypes.NETHER)
+                .usesMapFeatures()
+        // Load the main world, nether and end
+
+        //Load additional worlds
     }
 
     public void bind() {
