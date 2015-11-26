@@ -2,7 +2,7 @@ package org.spongepowered.lantern.plugin;
 
 import com.google.inject.Singleton;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.lantern.Sponge;
+import org.spongepowered.lantern.SpongeImpl;
 
 @Singleton
 public class MinecraftPluginContainer implements PluginContainer {
@@ -24,7 +24,7 @@ public class MinecraftPluginContainer implements PluginContainer {
 
     @Override
     public String getVersion() {
-        return Sponge.MINECRAFT_VERSION.getName();
+        return SpongeImpl.MINECRAFT_VERSION.getName();
     }
 
     @Override

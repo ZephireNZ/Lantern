@@ -8,8 +8,7 @@ import net.minecraft.launchwrapper.LaunchClassLoader;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.lantern.Sponge;
-import org.spongepowered.lantern.launch.console.ConsoleManager;
+import org.spongepowered.lantern.SpongeImpl;
 
 import java.io.File;
 import java.net.URL;
@@ -17,7 +16,7 @@ import java.util.List;
 
 public class LanternTweaker implements ITweaker {
 
-    private static final Logger logger = LogManager.getLogger(Sponge.ECOSYSTEM_NAME);
+    private static final Logger logger = LogManager.getLogger(SpongeImpl.ECOSYSTEM_NAME);
 
     private String[] args = ArrayUtils.EMPTY_STRING_ARRAY;
 

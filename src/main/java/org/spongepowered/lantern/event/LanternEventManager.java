@@ -19,7 +19,7 @@ import org.spongepowered.api.event.Order;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.service.event.EventManager;
-import org.spongepowered.lantern.Sponge;
+import org.spongepowered.lantern.SpongeImpl;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -122,13 +122,13 @@ public class LanternEventManager implements EventManager {
                     try {
                         handler = this.handlerFactory.create(listenerObject, method);
                     } catch (Exception e) {
-                        Sponge.getLogger().error("Failed to create handler for {} on {}", method, handle, e);
+                        SpongeImpl.getLogger().error("Failed to create handler for {} on {}", method, handle, e);
                         continue;
                     }
 
                     handlers.add(createRegistration(plugin, eventClass, listener, handler));
                 } else {
-                    Sponge.getLogger().warn("The method {} on {} has @{} but has the wrong signature", method, handle.getName(),
+                    SpongeImpl.getLogger().warn("The method {} on {} has @{} but has the wrong signature", method, handle.getName(),
                             Listener.class.getName());
                 }
             }
@@ -215,7 +215,7 @@ public class LanternEventManager implements EventManager {
             try {
                 handler.handle(event);
             } catch (Throwable e) {
-                Sponge.getLogger().error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin(), e);
+                SpongeImpl.getLogger().error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin(), e);
             }
         }
 

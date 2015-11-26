@@ -15,14 +15,13 @@ import org.spongepowered.api.service.ProviderExistsException;
 import org.spongepowered.lantern.configuration.LanternConfig;
 import org.spongepowered.lantern.registry.LanternGameRegistry;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import javax.annotation.Nullable;
 
 @Singleton
-public class Sponge {
+public class SpongeImpl {
 
     public static final String ECOSYSTEM_NAME = "Lantern";
     public static final String IMPLEMENTATION_VERSION = Objects.firstNonNull(LanternGame.class.getPackage().getImplementationVersion(), "DEV");
@@ -35,7 +34,7 @@ public class Sponge {
     private static final Path modConfigDir = configDir.resolve("sponge");
 
     @Nullable
-    private static Sponge instance;
+    private static SpongeImpl instance;
     @Nullable
     private static LanternConfig<LanternConfig.GlobalConfig> globalConfig;
     private final Injector injector;
@@ -45,7 +44,7 @@ public class Sponge {
     private PluginContainer minecraftPlugin;
 
     @Inject
-    public Sponge(Injector injector, LanternGame game, Logger logger, @Named(ECOSYSTEM_NAME) PluginContainer plugin, @Named("Minecraft") PluginContainer minecraftPlugin) {
+    public SpongeImpl(Injector injector, LanternGame game, Logger logger, @Named(ECOSYSTEM_NAME) PluginContainer plugin, @Named("Minecraft") PluginContainer minecraftPlugin) {
 
         checkState(instance == null, "Sponge was already initialized");
         instance = this;
@@ -61,17 +60,17 @@ public class Sponge {
 
     private <T> boolean registerService(Class<T> serviceClass, T serviceImpl) {
         try {
-            Sponge.getGame().getServiceManager().setProvider(Sponge.getPlugin(), serviceClass, serviceImpl);
+            SpongeImpl.getGame().getServiceManager().setProvider(SpongeImpl.getPlugin(), serviceClass, serviceImpl);
             return true;
         } catch (ProviderExistsException e) {
-            Sponge.getLogger().warn("Non-Sponge {} already registered: {}", serviceClass.getSimpleName(), e.getLocalizedMessage());
+            SpongeImpl.getLogger().warn("Non-Sponge {} already registered: {}", serviceClass.getSimpleName(), e.getLocalizedMessage());
             return false;
         }
     }
 
     // Getters
 
-    public static Sponge getSponge() {
+    public static SpongeImpl getSponge() {
         checkState(instance != null, "Sponge was not initialized");
         return instance;
     }

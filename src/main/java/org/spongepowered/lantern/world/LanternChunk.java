@@ -37,7 +37,7 @@ import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.StorageType;
 import org.spongepowered.api.world.extent.UnmodifiableBiomeArea;
 import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
-import org.spongepowered.lantern.Sponge;
+import org.spongepowered.lantern.SpongeImpl;
 import org.spongepowered.lantern.block.tileentity.LanternTileEntity;
 import org.spongepowered.lantern.entity.LanternEntity;
 import org.spongepowered.lantern.util.NibbleArray;
@@ -204,7 +204,7 @@ public class LanternChunk implements Chunk {
      */
     public void initializeSections(ChunkSection[] initSections) {
         if (isLoaded()) {
-            Sponge.getLogger().error("Tried to initialize already loaded chunk " + position.toString(), new Throwable());
+            SpongeImpl.getLogger().error("Tried to initialize already loaded chunk " + position.toString(), new Throwable());
             return;
         }
 

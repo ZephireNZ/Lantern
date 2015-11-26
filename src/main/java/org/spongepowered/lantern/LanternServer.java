@@ -38,7 +38,11 @@ import org.spongepowered.api.world.storage.ChunkLayout;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.lantern.launch.console.ConsoleManager;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
@@ -51,6 +55,7 @@ public class LanternServer implements Server {
     private final ConsoleManager consoleManager = new ConsoleManager();
 
     public LanternServer() {
+        //TODO: Commandline Args?
         //TODO: Get Ops, whitelist, bans
 
         start();
@@ -61,11 +66,29 @@ public class LanternServer implements Server {
         consoleManager.startConsole();
         consoleManager.startFile("latest.log"); //TODO: proper logging
 
+        //TODO: Fire AboutToStart
+
         //TODO: Load Ops, whitelist, bans
 
         //TODO: Load worlds
+        loadAllWorlds();
 
         //TODO: Start schedulers
+    }
+
+    public void loadAllWorlds() {
+        Path worlds = SpongeImpl.getGameDirectory();
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(worlds)) {
+            stream.forEach(world -> {
+                Path spongeFile = worlds.resolve("level_sponge.dat");
+                if(!Files.exists(spongeFile)) return;
+
+                loadWorld(world.getFileName().toString());
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // TODO: Load/Create the main world, nether and end
     }
 
     public void bind() {

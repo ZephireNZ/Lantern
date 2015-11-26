@@ -32,11 +32,15 @@ import org.spongepowered.api.Game;
 import org.spongepowered.api.GameDictionary;
 import org.spongepowered.api.GameState;
 import org.spongepowered.api.Platform;
+import org.spongepowered.api.data.ImmutableDataRegistry;
+import org.spongepowered.api.data.manipulator.DataManipulatorRegistry;
+import org.spongepowered.api.data.property.PropertyRegistry;
 import org.spongepowered.api.network.ChannelRegistrar;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.service.ServiceManager;
 import org.spongepowered.api.service.command.CommandService;
 import org.spongepowered.api.service.event.EventManager;
+import org.spongepowered.api.service.persistence.SerializationManager;
 import org.spongepowered.api.service.scheduler.SchedulerService;
 import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.lantern.registry.LanternGameRegistry;
@@ -46,7 +50,7 @@ import java.nio.file.Path;
 
 public class LanternGame implements Game {
 
-    private final Platform platform = new LanternPlatform(Sponge.MINECRAFT_VERSION, Sponge.API_VERSION, Sponge.IMPLEMENTATION_VERSION);
+    private final Platform platform = new LanternPlatform(SpongeImpl.MINECRAFT_VERSION, SpongeImpl.API_VERSION, SpongeImpl.IMPLEMENTATION_VERSION);
     private final PluginManager pluginManager;
     private final EventManager eventManager;
     private final LanternGameRegistry gameRegistry;
@@ -117,7 +121,7 @@ public class LanternGame implements Game {
 
     @Override
     public Path getSavesDirectory() {
-        return Sponge.getGameDirectory();
+        return SpongeImpl.getGameDirectory();
     }
 
     @Override
@@ -136,6 +140,26 @@ public class LanternGame implements Game {
 
     @Override
     public GameDictionary getGameDictionary() {
+        return null; //TODO: Implement
+    }
+
+    @Override
+    public SerializationManager getSerializationService() {
+        return null; //TODO: Implement
+    }
+
+    @Override
+    public PropertyRegistry getPropertyRegistry() {
+        return null; //TODO: Implement
+    }
+
+    @Override
+    public DataManipulatorRegistry getManipulatorRegistry() {
+        return null; //TODO: Implement
+    }
+
+    @Override
+    public ImmutableDataRegistry getImmutableDataRegistry() {
         return null; //TODO: Implement
     }
 }

@@ -33,7 +33,7 @@ import com.sun.istack.internal.Nullable;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.scheduler.SchedulerService;
 import org.spongepowered.api.service.scheduler.Task;
-import org.spongepowered.lantern.Sponge;
+import org.spongepowered.lantern.SpongeImpl;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -140,7 +140,7 @@ public class LanternScheduler implements SchedulerService {
      * @throws IllegalArgumentException If the object is not a plugin instance
      */
     static PluginContainer checkPluginInstance(Object plugin) {
-        Optional<PluginContainer> optPlugin = Sponge.getGame().getPluginManager().fromInstance(checkNotNull(plugin, "plugin"));
+        Optional<PluginContainer> optPlugin = SpongeImpl.getGame().getPluginManager().fromInstance(checkNotNull(plugin, "plugin"));
         checkArgument(optPlugin.isPresent(), "Provided object is not a plugin instance");
         return optPlugin.get();
     }

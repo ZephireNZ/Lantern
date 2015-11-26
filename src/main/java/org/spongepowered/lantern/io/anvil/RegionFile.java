@@ -62,7 +62,7 @@ package org.spongepowered.lantern.io.anvil;
 
  */
 
-import org.spongepowered.lantern.Sponge;
+import org.spongepowered.lantern.SpongeImpl;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -115,7 +115,7 @@ public class RegionFile {
             sizeDelta += 2 * SECTOR_BYTES - file.length();
             if (lastModified != 0) {
                 // only give a warning if the region file existed beforehand
-                Sponge.getLogger().warn("Region \"" + path + "\" under 8K: " + file.length() + " increasing by " + (2 * SECTOR_BYTES - file.length()));
+                SpongeImpl.getLogger().warn("Region \"" + path + "\" under 8K: " + file.length() + " increasing by " + (2 * SECTOR_BYTES - file.length()));
             }
 
             for (long i = file.length(); i < 2 * SECTOR_BYTES; ++i) {
@@ -126,7 +126,7 @@ public class RegionFile {
         // if the file size is not a multiple of 4KB, grow it
         if ((file.length() & 0xfff) != 0) {
             sizeDelta += SECTOR_BYTES - (file.length() & 0xfff);
-            Sponge.getLogger().warn("Region \"" + path + "\" not aligned: " + file.length() + " increasing by " + (SECTOR_BYTES - (file.length() & 0xfff)));
+            SpongeImpl.getLogger().warn("Region \"" + path + "\" not aligned: " + file.length() + " increasing by " + (SECTOR_BYTES - (file.length() & 0xfff)));
 
             for (long i = file.length() & 0xfff; i < SECTOR_BYTES; ++i) {
                 file.write(0);
@@ -157,7 +157,7 @@ public class RegionFile {
                     sectorFree.set(startSector + sectorNum, false);
                 }
             } else if (offset != 0) {
-                Sponge.getLogger().warn("Region \"" + path + "\": offsets[" + i + "] = " + offset + " -> " + startSector + "," + numSectors + " does not fit");
+                SpongeImpl.getLogger().warn("Region \"" + path + "\": offsets[" + i + "] = " + offset + " -> " + startSector + "," + numSectors + " does not fit");
             }
         }
         // read timestamps from timestamp table

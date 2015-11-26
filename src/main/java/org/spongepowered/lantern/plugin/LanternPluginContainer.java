@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.lantern.Sponge;
+import org.spongepowered.lantern.SpongeImpl;
 import org.spongepowered.lantern.guice.LanternPluginGuiceModule;
 
 public class LanternPluginContainer implements PluginContainer {
@@ -22,7 +22,7 @@ public class LanternPluginContainer implements PluginContainer {
         this.version = info.version();
         this.logger = LoggerFactory.getLogger(this.id);
 
-        this.instance = Sponge.getInjector().createChildInjector(new LanternPluginGuiceModule(this, pluginClass)).getInstance(pluginClass);
+        this.instance = SpongeImpl.getInjector().createChildInjector(new LanternPluginGuiceModule(this, pluginClass)).getInstance(pluginClass);
     }
 
     @Override

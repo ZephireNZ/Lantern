@@ -3,37 +3,60 @@ package org.spongepowered.lantern.data;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.service.persistence.InvalidDataException;
+import org.spongepowered.lantern.data.util.DataQueries;
+import org.spongepowered.lantern.data.util.DataUtil;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public abstract class LanternDataHolder implements DataHolder {
 
     private Map<Class<? extends DataManipulator<?, ?>>, DataManipulator<?, ?>> containerStore = Maps.newIdentityHashMap();
+    protected Map<Class<Property<?, ?>>, Property<?, ?>> properties = Maps.newIdentityHashMap();
+    protected static final Set<Class<? extends DataManipulator<?, ?>>> defaultManipulators = Sets.newIdentityHashSet();
 
     public LanternDataHolder(Map<Class<? extends DataManipulator<?, ?>>, DataManipulator<?, ?>> containerStore) {
         this.containerStore = Preconditions.checkNotNull(containerStore);
     }
 
     public LanternDataHolder(DataView container) {
-        //TODO: Implement
+        if(container.contains(DataQueries.DATA_MANIPULATORS)) {
+            List<DataManipulator<?, ?>> manipulators = DataUtil.deserializeManipulatorList(container.getViewList(DataQueries.DATA_MANIPULATORS).get());
+            manipulators.forEach(this::offer);
+        }
     }
 
-    public Collection<DataManipulator<?, ?>> getApplicableManipulators() {
-        return null; //TODO: Implement
+    /**
+     * Gets the default manipulators associated with this object. These
+     * manipulators will be added to the base object, rather than isolated.
+     */
+    public Set<DataManipulator<?, ?>> getDefaultManipulators() {
+        return defaultManipulators.stream()
+                .filter(containerStore::containsKey)
+                .map(containerStore::get)
+                .collect(Collectors.toSet());
     }
 
     @SuppressWarnings("unchecked")
@@ -45,11 +68,17 @@ public abstract class LanternDataHolder implements DataHolder {
         return Optional.empty();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T extends DataManipulator<?, ?>> Optional<T> getOrCreate(Class<T> containerClass) {
         if(get(containerClass).isPresent()) return get(containerClass);
 
-        return null;//TODO: Construct manipulator
+        Optional<DataManipulatorBuilder<?, ?>> optional = LanternDataRegistry.getInstance().getBuilder((Class) containerClass);
+        if (optional.isPresent()) {
+            return Optional.of((T) optional.get().create());
+        }
+
+        return Optional.empty();
     }
 
     @Override
@@ -57,19 +86,46 @@ public abstract class LanternDataHolder implements DataHolder {
         return null; //TODO: Implement
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public DataTransactionResult offer(DataManipulator<?, ?> valueContainer, MergeFunction function) {
-        return null; //TODO: Implement
+        DataTransactionBuilder builder = DataTransactionBuilder.builder();
+        DataManipulator<?, ?> existing = get(valueContainer.getClass()).orElse(null);
+        DataManipulator<?, ?> merged = function.merge(valueContainer, existing);
+        containerStore.put((Class<? extends DataManipulator<?, ?>>) valueContainer.getClass(), merged);
+        if(existing != null) builder.replace(existing.getValues());
+
+        return builder.success(merged.getValues())
+                .result(DataTransactionResult.Type.SUCCESS)
+                .build();
     }
 
     @Override
     public DataTransactionResult remove(Class<? extends DataManipulator<?, ?>> containerClass) {
-        return null; //TODO: Implement
+        DataManipulator<?, ?> manipulator = containerStore.get(containerClass);
+        if(manipulator != null) {
+            this.containerStore.remove(containerClass);
+            return DataTransactionBuilder.builder().replace(manipulator.getValues())
+                    .result(DataTransactionResult.Type.SUCCESS).build();
+        } else {
+            return DataTransactionBuilder.failNoData();
+        }
     }
 
     @Override
     public DataTransactionResult remove(Key<?> key) {
-        return null; //TODO: Implement
+        final Iterator<DataManipulator<?, ?>> iterator = this.containerStore.values().iterator();
+        while (iterator.hasNext()) {
+            final DataManipulator<?, ?> manipulator = iterator.next();
+            if (manipulator.getKeys().size() == 1 && manipulator.supports(key)) {
+                iterator.remove();
+                return DataTransactionBuilder.builder()
+                        .replace(manipulator.getValues())
+                        .result(DataTransactionResult.Type.SUCCESS)
+                        .build();
+            }
+        }
+        return DataTransactionBuilder.failNoData();
     }
 
     @Override
@@ -93,33 +149,53 @@ public abstract class LanternDataHolder implements DataHolder {
     }
 
     @Override
-    public Collection<DataManipulator<?, ?>> getContainers() {
-        return null; //TODO: Implement
+    public Set<DataManipulator<?, ?>> getContainers() {
+        return Sets.newHashSet(containerStore.values());
     }
 
     @Override
     public DataContainer toContainer() {
-        return null; //TODO: Implement
+        DataContainer ret = new MemoryDataContainer();
+        Set<DataManipulator<?, ?>> defaults = getDefaultManipulators();
+        Set<DataManipulator<?, ?>> customs = Sets.difference(getDefaultManipulators(), getContainers());
+
+        for(DataManipulator<?, ?> manipulator : defaults) {
+            DataUtil.merge(ret, manipulator.toContainer());
+        }
+        ret.set(DataQueries.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(customs));
+
+        return ret;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
-        return null; //TODO: Implement
+        return Optional.ofNullable((T) properties.get(propertyClass));
     }
 
     @Override
     public Collection<Property<?, ?>> getApplicableProperties() {
-        return null; //TODO: Implement
+        return Collections.unmodifiableCollection(properties.values());
     }
 
     @Override
     public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
-        return null; //TODO: Implement
+        for(DataManipulator<?, ?> manipulator : this.containerStore.values()) {
+            if(manipulator.supports(key)) {
+                return manipulator.get(key);
+            }
+        }
+        return Optional.empty();
     }
 
     @Override
     public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
-        return null; //TODO: Implement
+        for(DataManipulator<?, ?> manipulator : this.containerStore.values()) {
+            if(manipulator.supports(key)) {
+                return manipulator.getValue(key);
+            }
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -134,5 +210,30 @@ public abstract class LanternDataHolder implements DataHolder {
         ImmutableSet.Builder<ImmutableValue<?>> builder = ImmutableSet.builder();
         containerStore.values().forEach(data -> builder.addAll(data.getValues()));
         return builder.build();
+    }
+
+    @Override
+    public boolean supports(Class<? extends DataManipulator<?, ?>> holderClass) {
+        return false; //TODO: Implement
+    }
+
+    @Override
+    public boolean supports(Key<?> key) {
+        return false; //TODO: Implement
+    }
+
+    @Override
+    public boolean validateRawData(DataContainer container) {
+        return false; //TODO: Implement
+    }
+
+    @Override
+    public void setRawData(DataContainer container) throws InvalidDataException {
+        //TODO: Implement
+    }
+
+    @Override
+    public <E> DataTransactionResult transform(Key<? extends BaseValue<E>> key, Function<E, E> function) {
+        return null; //TODO: Implement
     }
 }

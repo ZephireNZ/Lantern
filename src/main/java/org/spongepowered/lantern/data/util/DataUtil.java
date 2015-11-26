@@ -42,7 +42,7 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.lantern.Sponge;
+import org.spongepowered.lantern.SpongeImpl;
 import org.spongepowered.lantern.data.LanternDataRegistry;
 
 import java.util.List;
@@ -163,9 +163,9 @@ public class DataUtil {
         final double y = view.getDouble(Queries.POSITION_Y).get();
         final double z = view.getDouble(Queries.POSITION_Z).get();
         if (castToInt) {
-            return new Location<>(Sponge.getGame().getServer().getWorld(worldUuid).get(), (int) x, (int) y, (int) z);
+            return new Location<>(SpongeImpl.getGame().getServer().getWorld(worldUuid).get(), (int) x, (int) y, (int) z);
         } else {
-            return new Location<>(Sponge.getGame().getServer().getWorld(worldUuid).get(), x, y, z);
+            return new Location<>(SpongeImpl.getGame().getServer().getWorld(worldUuid).get(), x, y, z);
         }
 
     }
@@ -194,6 +194,14 @@ public class DataUtil {
         final double y = internal.getDouble(Queries.POSITION_Y).get();
         final double z = internal.getDouble(Queries.POSITION_Z).get();
         return new Vector3d(x, y, z);
+    }
+
+    public static DataView merge(DataView view1, DataView view2) {
+        for(DataQuery query : view2.getKeys(false)) {
+            view1.set(query, view2.get(query));
+        }
+
+        return view1;
     }
 
 }
