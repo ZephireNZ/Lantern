@@ -8,6 +8,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.FallDistanceData;
 import org.spongepowered.api.data.manipulator.mutable.entity.IgniteableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.InvisibilityData;
 import org.spongepowered.api.data.manipulator.mutable.entity.InvulnerabilityData;
+import org.spongepowered.api.data.manipulator.mutable.entity.PassengerData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SizeData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VelocityData;
 import org.spongepowered.api.entity.Entity;
@@ -33,6 +34,7 @@ public abstract class LanternEntity extends LanternDataHolder implements Entity 
         defaultManipulators.add(SizeData.class);
         defaultManipulators.add(InvulnerabilityData.class);
         defaultManipulators.add(BreathingData.class);
+        defaultManipulators.add(PassengerData.class);
     }
 
     public LanternEntity(DataView container) {
