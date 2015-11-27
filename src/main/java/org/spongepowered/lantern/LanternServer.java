@@ -73,7 +73,7 @@ public class LanternServer implements Server {
         //TODO: Load worlds
         loadAllWorlds();
 
-        //TODO: Start schedulers
+        SpongeImpl.getGame().getScheduler().start();
     }
 
     public void loadAllWorlds() {

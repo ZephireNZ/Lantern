@@ -35,9 +35,9 @@ public class SyncScheduler extends SchedulerBase {
 
     private final WorldScheduler worlds;
 
-    SyncScheduler() {
+    SyncScheduler(WorldScheduler worldScheduler) {
         super(ScheduledTask.TaskSynchronicity.SYNCHRONOUS);
-        this.worlds = new WorldScheduler();
+        this.worlds = worldScheduler;
     }
 
     /**
@@ -45,10 +45,6 @@ public class SyncScheduler extends SchedulerBase {
      */
     void tick() {
         this.runTick();
-    }
-
-    public WorldScheduler getWorldScheduler() {
-        return worlds;
     }
 
     @Override

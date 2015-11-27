@@ -105,7 +105,7 @@ public class LanternGame implements Game {
     }
 
     @Override
-    public SchedulerService getScheduler() {
+    public LanternScheduler getScheduler() {
         return LanternScheduler.getInstance();
     }
 

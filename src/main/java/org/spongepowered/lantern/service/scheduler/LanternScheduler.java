@@ -70,12 +70,14 @@ public class LanternScheduler implements SchedulerService {
     private final ScheduledExecutorService tickExecutor = Executors.newSingleThreadScheduledExecutor(LanternThreadFactory.INSTANCE);
 
     private final AsyncScheduler asyncScheduler;
+    private final WorldScheduler worldScheduler;
     private final SyncScheduler syncScheduler;
 
     protected LanternScheduler() {
         instance = this;
         this.asyncScheduler = new AsyncScheduler();
-        this.syncScheduler = new SyncScheduler();
+        this.worldScheduler = new WorldScheduler();
+        this.syncScheduler = new SyncScheduler(this.worldScheduler);
     }
 
     public static LanternScheduler getInstance() {
@@ -97,7 +99,7 @@ public class LanternScheduler implements SchedulerService {
      */
     public void stop() {
         getScheduledTasks().forEach(Task::cancel);
-        syncScheduler.getWorldScheduler().stop();
+        this.worldScheduler.stop();
         tickExecutor.shutdownNow();
     }
 
