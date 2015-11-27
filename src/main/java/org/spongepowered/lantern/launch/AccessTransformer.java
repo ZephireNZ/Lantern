@@ -38,7 +38,7 @@ public class AccessTransformer implements IClassTransformer {
     private final ImmutableMultimap<String, Modifier> modifiers;
 
     public AccessTransformer() throws IOException {
-        this((URL[]) Launch.blackboard.get("vanilla.at"));
+        this((URL[]) Launch.blackboard.get("lantern.at"));
     }
 
     protected AccessTransformer(String file) throws IOException {
