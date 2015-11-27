@@ -29,8 +29,6 @@ import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.data.ImmutableDataRegistry;
-import org.spongepowered.api.data.manipulator.DataManipulatorRegistry;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.recipe.RecipeRegistry;
@@ -150,16 +148,6 @@ public class LanternGameRegistry implements GameRegistry {
 
     @Override
     public RecipeRegistry getRecipeRegistry() {
-        return null; //TODO: Implement
-    }
-
-    @Override
-    public DataManipulatorRegistry getManipulatorRegistry() {
-        return null; //TODO: Implement
-    }
-
-    @Override
-    public ImmutableDataRegistry getImmutableDataRegistry() {
         return null; //TODO: Implement
     }
 
