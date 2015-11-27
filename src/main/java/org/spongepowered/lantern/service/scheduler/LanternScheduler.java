@@ -39,15 +39,35 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Singleton
 public class LanternScheduler implements SchedulerService {
 
+    private static class LanternThreadFactory implements ThreadFactory {
+        public static final LanternThreadFactory INSTANCE = new LanternThreadFactory();
+        private final AtomicInteger threadCounter = new AtomicInteger();
+
+        private LanternThreadFactory() {
+        }
+
+        @Override
+        public Thread newThread(Runnable runnable) {
+            return new Thread(runnable, "Lantern-scheduler-" + threadCounter.getAndIncrement());
+        }
+    }
+
     @Nullable
     private static LanternScheduler instance;
     public static final int TICK_DURATION = 50;
+
+    private final ScheduledExecutorService tickExecutor = Executors.newSingleThreadScheduledExecutor(LanternThreadFactory.INSTANCE);
 
     private final AsyncScheduler asyncScheduler;
     private final SyncScheduler syncScheduler;
@@ -60,6 +80,25 @@ public class LanternScheduler implements SchedulerService {
 
     public static LanternScheduler getInstance() {
         return instance;
+    }
+
+    public void start() {
+        tickExecutor.scheduleAtFixedRate(() -> {
+            try {
+                tickSyncScheduler();
+            } catch (Exception ex) {
+                SpongeImpl.getLogger().error("Error while pulsing", ex);
+            }
+        }, 0, TICK_DURATION, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * Stops the scheduler and all tasks.
+     */
+    public void stop() {
+        getScheduledTasks().forEach(Task::cancel);
+        syncScheduler.getWorldScheduler().stop();
+        tickExecutor.shutdownNow();
     }
 
     @Override

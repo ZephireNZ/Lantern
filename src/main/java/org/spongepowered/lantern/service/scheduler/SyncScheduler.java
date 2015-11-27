@@ -24,21 +24,31 @@
  */
 package org.spongepowered.lantern.service.scheduler;
 
+import org.spongepowered.lantern.SpongeImpl;
+
+import java.util.concurrent.RejectedExecutionException;
+
 public class SyncScheduler extends SchedulerBase {
 
     // The number of ticks elapsed since this scheduler began.
-    private volatile long counter = 0L;
+    private volatile int currentTick = 0;
+
+    private final WorldScheduler worlds;
 
     SyncScheduler() {
         super(ScheduledTask.TaskSynchronicity.SYNCHRONOUS);
+        this.worlds = new WorldScheduler();
     }
 
     /**
      * The hook to update the Ticks known by the SyncScheduler.
      */
     void tick() {
-        this.counter++;
         this.runTick();
+    }
+
+    public WorldScheduler getWorldScheduler() {
+        return worlds;
     }
 
     @Override
@@ -46,19 +56,48 @@ public class SyncScheduler extends SchedulerBase {
         if (task.getState() == ScheduledTask.ScheduledTaskState.WAITING) {
             // The timestamp is based on the initial offset
             if (task.delayIsTicks) {
-                return this.counter;
+                return this.currentTick;
             } else {
                 return super.getTimestamp(task);
             }
         } else if (task.getState().isActive) {
             // The timestamp is based on the period
             if (task.intervalIsTicks) {
-                return this.counter;
+                return this.currentTick;
             } else {
                 return super.getTimestamp(task);
             }
         }
         return 0L;
+    }
+
+    @Override
+    protected void preTick() {
+        try {
+            currentTick = worlds.beginTick();
+            try {
+                new SpongeTaskBuilder().async().execute(this.worlds::doTickEnd).submit(SpongeImpl.getPlugin());
+            } catch (RejectedExecutionException ex) {
+                worlds.stop();
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } finally {
+            worlds.getLock().lock();
+        }
+    }
+
+    @Override
+    protected void finallyPostTick() {
+        try {
+            while (!worlds.isTickComplete(currentTick)) {
+                worlds.getCondition().await();
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } finally {
+            worlds.getLock().unlock();
+        }
     }
 
     @Override

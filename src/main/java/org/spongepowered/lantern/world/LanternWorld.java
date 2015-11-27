@@ -72,6 +72,13 @@ public class LanternWorld implements World {
 //        this.
     }
 
+    /**
+     * Updates all the entities within this world.
+     */
+    public void pulse() {
+        //TODO: Implement
+    }
+
     @Override
     public Difficulty getDifficulty() {
         return null; //TODO: Implement
