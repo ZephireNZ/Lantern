@@ -41,7 +41,6 @@ import org.spongepowered.api.service.ServiceManager;
 import org.spongepowered.api.service.command.CommandService;
 import org.spongepowered.api.service.event.EventManager;
 import org.spongepowered.api.service.persistence.SerializationManager;
-import org.spongepowered.api.service.scheduler.SchedulerService;
 import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.lantern.registry.LanternGameRegistry;
 import org.spongepowered.lantern.service.scheduler.LanternScheduler;
@@ -56,17 +55,19 @@ public class LanternGame implements Game {
     private final LanternGameRegistry gameRegistry;
     private final ServiceManager serviceManager;
     private final TeleportHelper teleportHelper;
+    private final LanternScheduler scheduler;
 
     private GameState state = GameState.CONSTRUCTION;
     private LanternServer server;
 
     @Inject
-    public LanternGame(PluginManager pluginManager, EventManager eventManager, LanternGameRegistry gameRegistry, ServiceManager serviceManager, TeleportHelper teleportHelper) {
+    public LanternGame(PluginManager pluginManager, EventManager eventManager, LanternGameRegistry gameRegistry, ServiceManager serviceManager, TeleportHelper teleportHelper, LanternScheduler scheduler) {
         this.pluginManager = checkNotNull(pluginManager);
         this.eventManager = checkNotNull(eventManager);
         this.gameRegistry = checkNotNull(gameRegistry);
         this.serviceManager = checkNotNull(serviceManager);
         this.teleportHelper = checkNotNull(teleportHelper);
+        this.scheduler = checkNotNull(scheduler);
     }
 
     @Override
@@ -106,7 +107,7 @@ public class LanternGame implements Game {
 
     @Override
     public LanternScheduler getScheduler() {
-        return LanternScheduler.getInstance();
+        return this.scheduler;
     }
 
     @Override
