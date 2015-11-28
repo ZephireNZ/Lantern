@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -290,6 +291,9 @@ public class LanternConfig<T extends LanternConfig.ConfigBase> {
         @Setting("level-type")
         private String levelType = "DEFAULT";
 
+        @Setting("log-file")
+        private String logFile = "logs/log-%D.txt";
+
         public BungeeCordCategory getBungeeCord() {
             return this.bungeeCord;
         }
@@ -406,6 +410,10 @@ public class LanternConfig<T extends LanternConfig.ConfigBase> {
 
         public String getLevelType() {
             return levelType;
+        }
+
+        public Path getLogFile() {
+            return Paths.get(logFile);
         }
     }
 

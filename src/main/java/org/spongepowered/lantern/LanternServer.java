@@ -64,7 +64,7 @@ public class LanternServer implements Server {
 
     public void start() {
         consoleManager.startConsole();
-        consoleManager.startFile("latest.log"); //TODO: proper logging
+        consoleManager.startFile(SpongeImpl.getGlobalConfig().getConfig().getLogFile());
 
         //TODO: Fire AboutToStart
 

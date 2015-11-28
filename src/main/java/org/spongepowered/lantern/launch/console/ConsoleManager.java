@@ -8,12 +8,13 @@ import org.spongepowered.lantern.SpongeImpl;
 import org.spongepowered.lantern.service.scheduler.LanternScheduler;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -76,12 +77,15 @@ public final class ConsoleManager {
         thread.start();
     }
 
-    public void startFile(String logfile) {
-        File parent = new File(logfile).getParentFile();
-        if (!parent.isDirectory() && !parent.mkdirs()) {
-            logger.warning("Could not create log folder: " + parent);
-        }
-        Handler fileHandler = new RotatingFileHandler(logfile);
+    public void startFile(Path logfile) {
+        try {
+            if (Files.isRegularFile(logfile.getParent())) {
+                logger.warning("File already exists: " + logfile.getParent().toString());
+            }
+            Files.createDirectories(logfile.getParent());
+        } catch (IOException ignored) {} // Exception means it exists already
+
+        Handler fileHandler = new RotatingFileHandler(logfile.toString());
         fileHandler.setFormatter(new DateOutputFormatter(FILE_DATE, false));
         logger.addHandler(fileHandler);
     }
