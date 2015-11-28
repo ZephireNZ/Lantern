@@ -74,7 +74,7 @@ public class LanternTweaker implements ITweaker {
 
     @Override
     public String getLaunchTarget() {
-        return "org.spongepowered.lantern.LanternServer";
+        return "org.spongepowered.lantern.Lantern";
     }
 
     @Override
