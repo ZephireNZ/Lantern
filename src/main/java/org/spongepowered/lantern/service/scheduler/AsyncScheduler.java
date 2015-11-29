@@ -141,4 +141,7 @@ public class AsyncScheduler extends SchedulerBase {
         }
     }
 
+    public ExecutorService getExecutor() {
+        return executor;
+    }
 }

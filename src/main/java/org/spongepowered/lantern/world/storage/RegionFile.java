@@ -1,4 +1,4 @@
-package org.spongepowered.lantern.io.anvil;
+package org.spongepowered.lantern.world.storage;
 
 /*
  ** 2011 January 5

@@ -39,6 +39,7 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -215,6 +216,10 @@ public class LanternScheduler implements SchedulerService {
      */
     public void tickSyncScheduler() {
         this.syncScheduler.tick();
+    }
+
+    public ExecutorService getAsyncExecutor() {
+        return this.asyncScheduler.getExecutor();
     }
 
 }

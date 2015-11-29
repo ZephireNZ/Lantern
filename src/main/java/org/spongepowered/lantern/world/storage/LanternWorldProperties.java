@@ -1,8 +1,8 @@
-package org.spongepowered.lantern.world;
+package org.spongepowered.lantern.world.storage;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spongepowered.api.data.DataQuery.of;
 import static org.spongepowered.lantern.data.util.DataQueries.*;
-import static org.spongepowered.lantern.io.meta.NbtWorldMetadataService.*;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
@@ -41,6 +41,46 @@ import java.util.stream.Collectors;
 
 public class LanternWorldProperties implements WorldProperties {
 
+    public static final DataQuery LEVEL_DATA = of("Data");
+    public static final DataQuery SEED = of("RandomSeed");
+    public static final DataQuery CLEAR_WEATHER_TIME = of("clearWeatherTime");
+    public static final DataQuery THUNDERING = of("thundering");
+    public static final DataQuery THUNDER_TIME = of("thunderTime");
+    public static final DataQuery RAINING = of("raining");
+    public static final DataQuery RAIN_TIME = of("rainTime");
+    public static final DataQuery TIME = of("Time");
+    public static final DataQuery WORLD_TIME = of("DayTime");
+    public static final DataQuery SPAWN_X = of("SpawnX");
+    public static final DataQuery SPAWN_Y = of("SpawnY");
+    public static final DataQuery SPAWN_Z = of("SpawnZ");
+    public static final DataQuery GAME_RULES = of("GameRules");
+    public static final DataQuery PLAYER = of("Player");
+    public static final DataQuery LEVEL_NAME = of("LevelName");
+    public static final DataQuery VERSION = of("version");
+    public static final DataQuery LAST_PLAYED = of("LastPlayed");
+    public static final DataQuery DIMENSION_ID = of("dimensionId");
+    public static final DataQuery DIMENSION_TYPE = of("dimensionType");
+    public static final DataQuery WORLD_ENABLED = of("enabled");
+    public static final DataQuery KEEP_SPAWN_LOADED = of("keepSpawnLoaded");
+    public static final DataQuery LOAD_ON_STARTUP = of("loadOnStartup");
+    public static final DataQuery GENERATOR_MODIFIERS = of("generatorModifiers");
+    public static final DataQuery GENERATOR_NAME = of("generatorName");
+    public static final DataQuery GENERATOR_OPTIONS = of("generatorOptions");
+    public static final DataQuery GAME_TYPE = of("GameType");
+    public static final DataQuery MAP_FEATURES = of("MapFeatures");
+    public static final DataQuery HARDCORE = of("hardcore");
+    public static final DataQuery ALLOW_COMMANDS = DataQuery.of("allowCommands");
+    public static final DataQuery INITIALIZED = of("initialized");
+    public static final DataQuery BORDER_X = of("BorderCenterX");
+    public static final DataQuery BORDER_Z = of("BorderCenterZ");
+    public static final DataQuery BORDER_SIZE = of("BorderSize");
+    public static final DataQuery BORDER_TIME_REMAINING = of("BorderSizeLerpTime");
+    public static final DataQuery BORDER_SAFE_ZONE = of("BorderSafeZone");
+    public static final DataQuery BORDER_DAMAGE_PER_BLOCK = of("BorderDamagePerBlock");
+    public static final DataQuery BORDER_TARGET_SIZE = of("BorderSizeLerpTarget");
+    public static final DataQuery BORDER_WARNING_DISTANCE = of("BorderWarningBlocks");
+    public static final DataQuery BORDER_WARNING_TIME = of("BorderWarningTime");
+    public static final DataQuery DIFFICULTY = of("Difficulty");
     // Sponge fields
     private UUID uuid;
     private boolean enabled;

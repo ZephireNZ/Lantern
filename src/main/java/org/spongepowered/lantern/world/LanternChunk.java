@@ -11,9 +11,12 @@ import org.spongepowered.api.block.ScheduledBlockUpdate;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Property;
+import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
@@ -40,16 +43,24 @@ import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
 import org.spongepowered.lantern.SpongeImpl;
 import org.spongepowered.lantern.block.tileentity.LanternTileEntity;
 import org.spongepowered.lantern.entity.LanternEntity;
+import org.spongepowered.lantern.io.entity.EntityStorage;
 import org.spongepowered.lantern.util.NibbleArray;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
+
+import static org.spongepowered.api.data.DataQuery.of;
+import static org.spongepowered.lantern.data.util.DataQueries.ENTITY_ID;
+import static org.spongepowered.lantern.util.DataUtils.getByteArray;
+import static org.spongepowered.lantern.util.DataUtils.getIntArray;
 
 public class LanternChunk implements Chunk {
 
@@ -62,6 +73,20 @@ public class LanternChunk implements Chunk {
      * The Y depth of a single chunk section.
      */
     private static final int SEC_DEPTH = 16;
+
+    // Chunk Data Queries
+    public static final DataQuery LEVEL = of("Level");
+    public static final DataQuery SECTIONS = of("Sections");
+    public static final DataQuery BLOCKS = of("Blocks");
+    public static final DataQuery ADD = of("Add");
+    public static final DataQuery BLOCK_DATA = of("Data");
+    public static final DataQuery BLOCK_LIGHT = of("BlockLight");
+    public static final DataQuery SKY_LIGHT = of("SkyLight");
+    public static final DataQuery TERRAIN_POPULATED = of("TerrainPopulated");
+    public static final DataQuery BIOMES = of("Biomes");
+    public static final DataQuery HEIGHT_MAP = of("HeightMap");
+    public static final DataQuery ENTITIES = of("Entities");
+    public static final DataQuery TILE_ENTITIES = of("TileEntities");
 
     public Collection<LanternTileEntity> getRawTileEntities() {
         return tileEntities.values();
@@ -196,6 +221,168 @@ public class LanternChunk implements Chunk {
 
         this.heightMap = height;
         this.biomes = biomes;
+    }
+
+    public void load(DataContainer root) {
+        DataView levelTag = root.getView(LEVEL).get();
+
+        // read the vertical sections
+        List<DataView> sectionList = levelTag.getViewList(SECTIONS).get();
+        ChunkSection[] sections = new ChunkSection[16];
+        for (DataView sectionTag : sectionList) {
+            int y = sectionTag.getInt(Queries.POSITION_Y).get();
+            byte[] rawTypes = getByteArray(sectionTag, BLOCKS);
+            NibbleArray extTypes = sectionTag.contains(ADD) ? new NibbleArray(getByteArray(sectionTag, ADD)) : null;
+            NibbleArray blockData = new NibbleArray(getByteArray(sectionTag, BLOCK_DATA));
+            NibbleArray blockLight = new NibbleArray(getByteArray(sectionTag, BLOCK_LIGHT));
+            NibbleArray skyLight = new NibbleArray(getByteArray(sectionTag, SKY_LIGHT));
+
+            char[] types = new char[rawTypes.length];
+            for (int i = 0; i < rawTypes.length; i++) {
+                types[i] = (char) (((extTypes == null ? 0 : extTypes.get(i)) << 12) | ((rawTypes[i] & 0xff) << 4) | blockData.get(i));
+            }
+            sections[y] = new ChunkSection(types, skyLight, blockLight);
+        }
+
+        // initialize the chunk
+        initializeSections(sections);
+        setPopulated(levelTag.getBoolean(TERRAIN_POPULATED).get());
+
+        // read biomes
+        if (levelTag.contains(BIOMES)) {
+            setBiomes(getByteArray(levelTag, BIOMES));
+        }
+        // read height map
+        if (levelTag.contains(HEIGHT_MAP)) {
+            setHeightMap(getIntArray(levelTag, HEIGHT_MAP));
+        } else {
+            automaticHeightMap();
+        }
+
+        // read entities
+        //TODO: Rewrite
+        if (levelTag.contains(ENTITIES)) {
+            for (DataView entityTag : levelTag.getViewList(ENTITIES).get()) {
+                //TODO: Use serializable?
+                try {
+                    // note that creating the entity is sufficient to add it to the world
+                    EntityStorage.loadEntity(getWorld(), entityTag);
+                } catch (Exception e) {
+                    String id = entityTag.getString(ENTITY_ID).orElse("<missing>");
+                    if (e.getMessage() != null && e.getMessage().startsWith("Unknown entity type to load:")) {
+                        SpongeImpl.getLogger().warn("Unknown entity in " + this + ": " + id);
+                    } else {
+                        SpongeImpl.getLogger().warn("Error loading entity in " + this + ": " + id, e);
+                    }
+                }
+            }
+        }
+
+        // read tile entities
+        List<DataView> storedTileEntities = levelTag.getViewList(TILE_ENTITIES).get();
+        for (DataView tileEntityTag : storedTileEntities) {
+            int tx = tileEntityTag.getInt(of("x")).get();
+            int ty = tileEntityTag.getInt(of("y")).get();
+            int tz = tileEntityTag.getInt(of("z")).get();
+
+            //TODO: Rewrite?
+            Optional<TileEntity> tileEntity = getTileEntity(tx & 0xf, ty, tz & 0xf);
+            if (tileEntity.isPresent()) {
+                try {
+                    ((LanternTileEntity) tileEntity.get()).loadNbt(tileEntityTag);
+                } catch (Exception ex) {
+                    String id = tileEntityTag.getString(ENTITY_ID).orElse("<missing>");
+                    SpongeImpl.getLogger().error("Error loading tile entity at " + tileEntity.get().getLocation().getBlockPosition() + ": " + id, ex);
+                }
+            } else {
+                String id = tileEntityTag.getString(ENTITY_ID).orElse("<missing>");
+                SpongeImpl.getLogger().warn("Unknown tile entity at " + getWorld().getName() + "," + tx + "," + ty + "," + tz + ": " + id);
+            }
+        }
+    }
+
+    public void save(DataView out) {
+        int x = getPosition().getX();
+        int z = getPosition().getZ();
+        DataContainer levelTags = new MemoryDataContainer();
+
+        // core properties
+        levelTags.set(of("xPos"), x);
+        levelTags.set(of("zPos"), z);
+        levelTags.set(TERRAIN_POPULATED, isPopulated());
+        levelTags.set(of("LastUpdate"), 0);
+
+        // chunk sections
+        List<DataView> sectionTags = new ArrayList<>();
+        ChunkSection[] sections = getRawSections();
+        for (byte i = 0; i < sections.length; ++i) {
+            ChunkSection sec = sections[i];
+            if (sec == null) continue;
+
+            DataView sectionTag = new MemoryDataContainer();
+            sectionTag.set(Queries.POSITION_Y, i);
+
+            byte[] rawTypes = new byte[sec.types.length];
+            NibbleArray extTypes = null;
+            NibbleArray data = new NibbleArray(sec.types.length);
+            for (int j = 0; j < sec.types.length; j++) {
+                rawTypes[j] = (byte) ((sec.types[j] >> 4) & 0xFF);
+                byte extType = (byte) (sec.types[j] >> 12);
+                if (extType > 0) {
+                    if (extTypes == null) {
+                        extTypes = new NibbleArray(sec.types.length);
+                    }
+                    extTypes.set(j, extType);
+                }
+                data.set(j, (byte) (sec.types[j] & 0xF));
+            }
+            sectionTag.set(BLOCKS, rawTypes);
+            if (extTypes != null) {
+                sectionTag.set(ADD, extTypes.getRawData());
+            }
+            sectionTag.set(BLOCK_DATA, data.getRawData());
+            sectionTag.set(BLOCK_LIGHT, sec.blockLight.getRawData());
+            sectionTag.set(SKY_LIGHT, sec.skyLight.getRawData());
+
+            sectionTags.add(sectionTag);
+        }
+        levelTags.set(SECTIONS, sectionTags);
+
+        // height map and biomes
+        levelTags.set(HEIGHT_MAP, getRawHeightmap());
+        levelTags.set(BIOMES, getRawBiomes());
+
+        // entities
+        List<DataView> entities = new ArrayList<>();
+        for (LanternEntity entity : getRawEntities()) {
+            if (!entity.shouldSave()) {
+                continue;
+            }
+            try {
+                DataView tag = new MemoryDataContainer();
+                EntityStorage.save(entity, tag);
+                entities.add(tag);
+            } catch (Exception e) {
+                SpongeImpl.getLogger().warn("Error saving " + entity + " in " + this, e);
+            }
+        }
+        levelTags.set(ENTITIES, entities);
+
+        // tile entities
+        List<DataView> tileEntities = new ArrayList<>();
+        for (LanternTileEntity entity : getRawTileEntities()) {
+            try {
+                DataView tag = new MemoryDataContainer();
+                entity.saveNbt(tag);
+                tileEntities.add(tag);
+            } catch (Exception ex) {
+                SpongeImpl.getLogger().error("Error saving tile entity at " + entity.getBlock(), ex);
+            }
+        }
+        levelTags.set(TILE_ENTITIES, tileEntities);
+
+        DataView levelOut = new MemoryDataContainer();
+        levelOut.set(LEVEL, levelTags);
     }
 
     /**
