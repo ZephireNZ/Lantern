@@ -28,13 +28,13 @@ public class LanternWorldStorage implements WorldStorage {
 
     public LanternWorldStorage(Path world) {
         this.worldDir = world;
-        this.regions = new RegionFileCache(world.toFile(), ".mca");
+        this.regions = new RegionFileCache(world, ".mca");
         this.executor = MoreExecutors.listeningDecorator(LanternScheduler.getInstance().getAsyncExecutor());
     }
 
     @Override
     public ChunkDataStream getGeneratedChunks() {
-        return null; //TODO: Implement
+        return new MultiRegionStream(regions);
     }
 
     @Override

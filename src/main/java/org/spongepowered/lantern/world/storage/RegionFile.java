@@ -68,16 +68,21 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;
 
-public class RegionFile {
+import javax.annotation.Nullable;
+
+public class RegionFile implements Iterable<DataInputStream> {
 
     private static final int VERSION_GZIP = 1;
     private static final int VERSION_DEFLATE = 2;
@@ -95,17 +100,17 @@ public class RegionFile {
     private int sizeDelta;
     private long lastModified = 0;
 
-    public RegionFile(File path) throws IOException {
+    public RegionFile(Path path) throws IOException {
         offsets = new int[SECTOR_INTS];
         chunkTimestamps = new int[SECTOR_INTS];
 
         sizeDelta = 0;
 
-        if (path.exists()) {
-            lastModified = path.lastModified();
+        if (Files.isRegularFile(path)) {
+            lastModified = Files.getLastModifiedTime(path).toMillis();
         }
 
-        file = new RandomAccessFile(path, "rw");
+        file = new RandomAccessFile(path.toFile(), "rw");
 
         // seek to the end to prepare size checking
         file.seek(file.length());
@@ -182,6 +187,7 @@ public class RegionFile {
      * gets an (uncompressed) stream representing the chunk data returns null if
      * the chunk is not found or an error occurs
      */
+    @Nullable
     public DataInputStream getChunkDataInputStream(int x, int z) throws IOException {
         checkBounds(x, z);
 
@@ -191,6 +197,10 @@ public class RegionFile {
             return null;
         }
 
+        return getChunkDataInputStream(offset);
+    }
+
+    private DataInputStream getChunkDataInputStream(int offset) throws IOException {
         int sectorNumber = offset >> 8;
         int numSectors = offset & 0xFF;
         if (sectorNumber + numSectors > sectorFree.size()) {
@@ -353,5 +363,72 @@ public class RegionFile {
     public void close() throws IOException {
         file.getChannel().force(true);
         file.close();
+    }
+
+    /**
+     * Get the number of <i>generated</i> chunks this region holds.
+     * @return number of chunks
+     */
+    // TODO: Cache this number?
+    public int getChunkCount() {
+        int count = 0;
+        for(int offset : offsets) {
+            if(offset == 0) continue;
+            count++;
+        }
+        return count;
+    }
+
+    @Override
+    public RegionIterator iterator() {
+        return new RegionIterator();
+    }
+
+    class RegionIterator implements Iterator<DataInputStream> {
+
+        private int previousOffsetIndex = -1;
+
+        @Override
+        public boolean hasNext() {
+            return getNextOffset(previousOffsetIndex + 1) != -1;
+        }
+
+        @Override
+        public DataInputStream next() throws NoSuchElementException {
+            int offsetIndex = getNextOffset(++previousOffsetIndex);
+            if(offsetIndex == -1) throw new NoSuchElementException();
+
+            try {
+                return getChunkDataInputStream(offsets[offsetIndex]);
+            } catch (IOException e) {
+                throw new NoSuchElementException("Could not load chunk stream!");
+            }
+        }
+
+        /**
+         * Gets the number of chunks left to load. This may change if a chunk is
+         * later generated.
+         * @return number of chunks left
+         */
+        public int remaining() {
+            int count = 0;
+            for(int i = (previousOffsetIndex + 1); i < offsets.length; i++) {
+                if(offsets[i] != 0) {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
+        private int getNextOffset(int start) {
+            for(int i = start; i < offsets.length; i++) {
+                if(offsets[i] != 0) {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
     }
 }
