@@ -58,6 +58,7 @@ public class LanternWorldStorage implements WorldStorage {
                 if(!region.hasChunk(chunkCoords.getX(), chunkCoords.getZ())) return Optional.empty();
 
                 DataInputStream in = region.getChunkDataInputStream(chunkCoords.getX(), chunkCoords.getZ());
+                if(in == null) return Optional.empty();
 
                 try (NbtDataInputStream nbt = new NbtDataInputStream(in, false)) {
                     return Optional.of(nbt.read());
