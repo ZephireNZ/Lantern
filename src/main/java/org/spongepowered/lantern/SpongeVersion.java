@@ -22,48 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.lantern.service.scheduler;
+package org.spongepowered.lantern;
 
-public class SyncScheduler extends SchedulerBase {
+import static com.google.common.base.Objects.firstNonNull;
 
-    // The number of ticks elapsed since this scheduler began.
-    private volatile long counter = 0L;
+import org.spongepowered.api.MinecraftVersion;
 
-    SyncScheduler() {
-        super(ScheduledTask.TaskSynchronicity.SYNCHRONOUS);
+import java.util.Optional;
+
+public final class SpongeVersion {
+
+    // TODO: Keep up to date
+    public static final MinecraftVersion MINECRAFT_VERSION = new LanternMinecraftVersion("1.8", 47);
+
+    public static final String API_NAME = firstNonNull(getPackage().getSpecificationTitle(), SpongeImpl.API_NAME);
+    public static final String API_VERSION = firstNonNull(getPackage().getSpecificationVersion(), "DEV");
+
+    public static final Optional<String> IMPLEMENTATION_NAME = Optional.ofNullable(getPackage().getImplementationTitle());
+    public static final String IMPLEMENTATION_VERSION =  firstNonNull(getPackage().getImplementationVersion(), "DEV");
+
+    private SpongeVersion() {
     }
 
-    /**
-     * The hook to update the Ticks known by the SyncScheduler.
-     */
-    void tick() {
-        this.counter++;
-        this.runTick();
-    }
-
-    @Override
-    protected long getTimestamp(ScheduledTask task) {
-        if (task.getState() == ScheduledTask.ScheduledTaskState.WAITING) {
-            // The timestamp is based on the initial offset
-            if (task.delayIsTicks) {
-                return this.counter;
-            } else {
-                return super.getTimestamp(task);
-            }
-        } else if (task.getState().isActive) {
-            // The timestamp is based on the period
-            if (task.intervalIsTicks) {
-                return this.counter;
-            } else {
-                return super.getTimestamp(task);
-            }
-        }
-        return 0L;
-    }
-
-    @Override
-    protected void executeTaskRunnable(Runnable runnable) {
-        runnable.run();
+    private static Package getPackage() {
+        return SpongeVersion.class.getPackage();
     }
 
 }

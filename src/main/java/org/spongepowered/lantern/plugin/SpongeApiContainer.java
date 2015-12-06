@@ -1,37 +1,40 @@
 package org.spongepowered.lantern.plugin;
 
 import com.google.inject.Singleton;
-import org.spongepowered.api.plugin.PluginContainer;
+import org.slf4j.Logger;
 import org.spongepowered.lantern.SpongeImpl;
 import org.spongepowered.lantern.SpongeVersion;
 
 import java.util.Optional;
 
 @Singleton
-public class MinecraftPluginContainer extends AbstractPluginContainer {
+public class SpongeApiContainer extends AbstractPluginContainer {
 
-    private static final String NAME = "Minecraft";
-
-    protected MinecraftPluginContainer() {
+    protected SpongeApiContainer() {
     }
 
     @Override
     public String getId() {
-        return NAME;
+        return SpongeImpl.API_ID;
     }
 
     @Override
     public String getName() {
-        return NAME;
+        return SpongeImpl.API_NAME;
     }
 
     @Override
     public String getVersion() {
-        return SpongeVersion.MINECRAFT_VERSION.getName();
+        return SpongeVersion.API_VERSION;
+    }
+
+    @Override
+    public Logger getLogger() {
+        return SpongeImpl.getSlf4jLogger();
     }
 
     @Override
     public Optional<Object> getInstance() {
-        return Optional.empty();
+        return Optional.of(SpongeImpl.getGame());
     }
 }

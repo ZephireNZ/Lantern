@@ -1,10 +1,10 @@
-package org.spongepowered.lantern.service.config;
+package org.spongepowered.lantern.config;
 
+import org.spongepowered.api.config.ConfigManager;
+import org.spongepowered.api.config.ConfigRoot;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.service.config.ConfigRoot;
-import org.spongepowered.api.service.config.ConfigService;
 
-public class LanternConfigService implements ConfigService {
+public class LanternConfigManager implements ConfigManager {
 
     @Override
     public ConfigRoot getSharedConfig(Object instance) {

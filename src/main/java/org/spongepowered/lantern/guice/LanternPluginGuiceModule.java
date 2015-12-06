@@ -8,21 +8,20 @@ import com.google.inject.TypeLiteral;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.slf4j.Logger;
+import org.spongepowered.api.config.ConfigDir;
+import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.service.config.ConfigDir;
-import org.spongepowered.api.service.config.DefaultConfig;
-import org.spongepowered.lantern.plugin.LanternPluginContainer;
-import org.spongepowered.lantern.service.config.LanternConfigService;
+import org.spongepowered.lantern.config.LanternConfigManager;
 
 import java.io.File;
 import java.nio.file.Path;
 
 public class LanternPluginGuiceModule extends AbstractModule {
 
-    private final LanternPluginContainer container;
+    private final PluginContainer container;
     private final Class<?> pluginClass;
 
-    public LanternPluginGuiceModule(LanternPluginContainer container, Class<?> pluginClass) {
+    public LanternPluginGuiceModule(PluginContainer container, Class<?> pluginClass) {
         this.container = container;
         this.pluginClass = pluginClass;
     }
@@ -64,7 +63,7 @@ public class LanternPluginGuiceModule extends AbstractModule {
 
         @Override
         public Path get() {
-            return LanternConfigService.getPrivateRoot(this.container).getDirectory();
+            return LanternConfigManager.getPrivateRoot(this.container).getDirectory();
         }
     }
 
@@ -79,7 +78,7 @@ public class LanternPluginGuiceModule extends AbstractModule {
 
         @Override
         public Path get() {
-            return LanternConfigService.getPrivateRoot(this.container).getConfigPath();
+            return LanternConfigManager.getPrivateRoot(this.container).getConfigPath();
         }
 
     }
@@ -95,7 +94,7 @@ public class LanternPluginGuiceModule extends AbstractModule {
 
         @Override
         public Path get() {
-            return LanternConfigService.getSharedRoot(this.container).getConfigPath();
+            return LanternConfigManager.getSharedRoot(this.container).getConfigPath();
         }
 
     }
@@ -111,7 +110,7 @@ public class LanternPluginGuiceModule extends AbstractModule {
 
         @Override
         public ConfigurationLoader<CommentedConfigurationNode> get() {
-            return LanternConfigService.getSharedRoot(this.container).getConfig();
+            return LanternConfigManager.getSharedRoot(this.container).getConfig();
         }
 
     }
@@ -127,7 +126,7 @@ public class LanternPluginGuiceModule extends AbstractModule {
 
         @Override
         public ConfigurationLoader<CommentedConfigurationNode> get() {
-            return LanternConfigService.getPrivateRoot(this.container).getConfig();
+            return LanternConfigManager.getPrivateRoot(this.container).getConfig();
         }
 
     }

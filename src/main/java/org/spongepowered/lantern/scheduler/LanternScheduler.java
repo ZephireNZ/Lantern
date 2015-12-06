@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.lantern.service.scheduler;
+package org.spongepowered.lantern.scheduler;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -31,9 +31,9 @@ import com.google.common.collect.Sets;
 import com.google.inject.Singleton;
 import com.sun.istack.internal.Nullable;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.service.scheduler.SchedulerService;
-import org.spongepowered.api.service.scheduler.Task;
-import org.spongepowered.lantern.Sponge;
+import org.spongepowered.api.scheduler.Scheduler;
+import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.lantern.SpongeImpl;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -43,7 +43,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Singleton
-public class LanternScheduler implements SchedulerService {
+public class LanternScheduler implements Scheduler {
 
     @Nullable
     private static LanternScheduler instance;
@@ -140,7 +140,7 @@ public class LanternScheduler implements SchedulerService {
      * @throws IllegalArgumentException If the object is not a plugin instance
      */
     static PluginContainer checkPluginInstance(Object plugin) {
-        Optional<PluginContainer> optPlugin = Sponge.getGame().getPluginManager().fromInstance(checkNotNull(plugin, "plugin"));
+        Optional<PluginContainer> optPlugin = SpongeImpl.getGame().getPluginManager().fromInstance(checkNotNull(plugin, "plugin"));
         checkArgument(optPlugin.isPresent(), "Provided object is not a plugin instance");
         return optPlugin.get();
     }

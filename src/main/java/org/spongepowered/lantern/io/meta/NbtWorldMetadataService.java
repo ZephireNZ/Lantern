@@ -4,7 +4,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.lantern.Sponge;
+import org.spongepowered.lantern.SpongeImpl;
 import org.spongepowered.lantern.io.WorldMetadataService;
 import org.spongepowered.lantern.util.nbt.NbtDataInputStream;
 import org.spongepowered.lantern.util.nbt.NbtDataOutputStream;
@@ -68,7 +68,7 @@ public class NbtWorldMetadataService implements WorldMetadataService {
         try {
             Files.createDirectories(dir);
         } catch (IOException e){
-            Sponge.getLogger().warn("Failed to create directory: " + dir);
+            SpongeImpl.getLogger().warn("Failed to create directory: " + dir);
         }
     }
 
@@ -100,8 +100,8 @@ public class NbtWorldMetadataService implements WorldMetadataService {
     }
 
     private void handleWorldException(String file, IOException e) {
-        Sponge.getGame().getServer().unloadWorld(world);
-        Sponge.getLogger().error("Unable to access " + file + " for world " + world.getName(), e);
+        SpongeImpl.getGame().getServer().unloadWorld(world);
+        SpongeImpl.getLogger().error("Unable to access " + file + " for world " + world.getName(), e);
     }
 
     @Override

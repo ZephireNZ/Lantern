@@ -3,9 +3,9 @@ package org.spongepowered.lantern.launch.console;
 import jline.console.ConsoleReader;
 import jline.console.completer.Completer;
 import org.fusesource.jansi.AnsiConsole;
-import org.spongepowered.api.util.command.source.ConsoleSource;
-import org.spongepowered.lantern.Sponge;
-import org.spongepowered.lantern.service.scheduler.LanternScheduler;
+import org.spongepowered.api.command.source.ConsoleSource;
+import org.spongepowered.lantern.SpongeImpl;
+import org.spongepowered.lantern.scheduler.LanternScheduler;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -119,9 +119,9 @@ public final class ConsoleManager {
             try {
                 LanternScheduler.getInstance().createTaskBuilder()
                         .execute(() -> {
-                            candidates.addAll(Sponge.getGame().getCommandDispatcher().getSuggestions(ConsoleManager.this.sender, buffer));
+                            candidates.addAll(SpongeImpl.getGame().getCommandManager().getSuggestions(ConsoleManager.this.sender, buffer));
                         })
-                        .submit(Sponge.getSponge());
+                        .submit(SpongeImpl.getInstance());
 
                 return buffer.lastIndexOf(' ') + 1;
             } catch (Throwable t) {
@@ -146,9 +146,9 @@ public final class ConsoleManager {
                     final String tempCommand = command.trim();
                     LanternScheduler.getInstance().createTaskBuilder()
                             .execute(() -> {
-                                Sponge.getGame().getCommandDispatcher().process(ConsoleManager.this.sender, tempCommand);
+                                SpongeImpl.getGame().getCommandManager().process(ConsoleManager.this.sender, tempCommand);
                             })
-                            .submit(Sponge.getSponge());
+                            .submit(SpongeImpl.getInstance());
 
                 } catch (Exception ex) {
                     logger.log(Level.SEVERE, "Error while executing command: " + command, ex);

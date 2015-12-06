@@ -39,10 +39,10 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.service.persistence.InvalidDataException;
+import org.spongepowered.api.util.persistence.InvalidDataException;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.lantern.Sponge;
+import org.spongepowered.lantern.SpongeImpl;
 import org.spongepowered.lantern.data.LanternDataRegistry;
 
 import java.util.List;
@@ -163,9 +163,9 @@ public class DataUtil {
         final double y = view.getDouble(Queries.POSITION_Y).get();
         final double z = view.getDouble(Queries.POSITION_Z).get();
         if (castToInt) {
-            return new Location<>(Sponge.getGame().getServer().getWorld(worldUuid).get(), (int) x, (int) y, (int) z);
+            return new Location<>(SpongeImpl.getGame().getServer().getWorld(worldUuid).get(), (int) x, (int) y, (int) z);
         } else {
-            return new Location<>(Sponge.getGame().getServer().getWorld(worldUuid).get(), x, y, z);
+            return new Location<>(SpongeImpl.getGame().getServer().getWorld(worldUuid).get(), x, y, z);
         }
 
     }

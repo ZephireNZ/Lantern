@@ -22,10 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.lantern.service.scheduler;
+package org.spongepowered.lantern.scheduler;
 
-import org.spongepowered.api.service.scheduler.Task;
-import org.spongepowered.lantern.Sponge;
+import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.lantern.SpongeImpl;
 
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -111,7 +111,7 @@ public class AsyncScheduler extends SchedulerBase {
             // The taskMap has been modified; there is work to do.
             // Continue on without handling the Exception.
         } catch (IllegalMonitorStateException e) {
-            Sponge.getLogger().error("The scheduler internal state machine suffered a catastrophic error", e);
+            SpongeImpl.getLogger().error("The scheduler internal state machine suffered a catastrophic error", e);
         }
     }
 

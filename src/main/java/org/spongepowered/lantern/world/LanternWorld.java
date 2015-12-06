@@ -26,13 +26,13 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.permission.context.Context;
-import org.spongepowered.api.service.persistence.InvalidDataException;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.DiscreteTransform2;
 import org.spongepowered.api.util.DiscreteTransform3;
+import org.spongepowered.api.util.persistence.InvalidDataException;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.Location;
@@ -683,16 +683,6 @@ public class LanternWorld implements World {
     }
 
     @Override
-    public void sendMessage(ChatType type, Text... messages) {
-        //TODO: Implement
-    }
-
-    @Override
-    public void sendMessage(ChatType type, Iterable<Text> messages) {
-        //TODO: Implement
-    }
-
-    @Override
     public void sendTitle(Title title) {
         //TODO: Implement
     }
@@ -736,5 +726,25 @@ public class LanternWorld implements World {
 
     public void setGameRule(String rule, String value) {
         // TODO: Implement
+    }
+
+    @Override
+    public Collection<Direction> getFacesWithProperty(int x, int y, int z, Class<? extends Property<?, ?>> propertyClass) {
+        return null; //TODO: Implement
+    }
+
+    @Override
+    public void sendMessage(ChatType type, Text message) {
+        //TODO: Implement
+    }
+
+    @Override
+    public void sendMessages(ChatType type, Text... messages) {
+        //TODO: Implement
+    }
+
+    @Override
+    public void sendMessages(ChatType type, Iterable<Text> messages) {
+        //TODO: Implement
     }
 }

@@ -27,14 +27,15 @@ package org.spongepowered.lantern;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.Server;
+import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
+import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.resourcepack.ResourcePack;
-import org.spongepowered.api.service.world.ChunkLoadService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.sink.MessageSink;
-import org.spongepowered.api.util.command.source.ConsoleSource;
+import org.spongepowered.api.world.ChunkTicketManager;
 import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
@@ -43,7 +44,7 @@ import org.spongepowered.api.world.WorldBuilder;
 import org.spongepowered.api.world.WorldCreationSettings;
 import org.spongepowered.api.world.storage.ChunkLayout;
 import org.spongepowered.api.world.storage.WorldProperties;
-import org.spongepowered.lantern.configuration.LanternConfig;
+import org.spongepowered.lantern.config.LanternConfig;
 import org.spongepowered.lantern.launch.console.ConsoleManager;
 
 import java.net.InetSocketAddress;
@@ -81,9 +82,9 @@ public class LanternServer implements Server {
     }
 
     public void loadAllWorlds() {
-        GameRegistry registry = Sponge.getRegistry();
+        GameRegistry registry = SpongeImpl.getRegistry();
         WorldBuilder builder = registry.createBuilder(WorldBuilder.class);
-        LanternConfig.GlobalConfig config = Sponge.getGlobalConfig().getConfig();
+        LanternConfig.GlobalConfig config = SpongeImpl.getGlobalConfig().getConfig();
 
         GeneratorType generatorType = registry.getType(GeneratorType.class, config.getLevelType()).orElse(GeneratorTypes.OVERWORLD);
         GameMode gameMode = registry.getType(GameMode.class, config.getGamemode()).orElse(GameModes.SURVIVAL);
@@ -107,14 +108,15 @@ public class LanternServer implements Server {
                 //TODO: TeleporterAgent?
                 .build();
 
+        //TODO: Finish this!
         builder.name("DIM-1")
                 .enabled(true)
                 .loadsOnStartup(true)
                 .keepsSpawnLoaded(false)
                 .gameMode(gameMode)
                 .generator(GeneratorTypes.NETHER)
-                .dimensionType(DimensionTypes.NETHER)
-                .usesMapFeatures()
+                .dimensionType(DimensionTypes.NETHER);
+//                .usesMapFeatures()
         // Load the main world, nether and end
 
         //Load additional worlds
@@ -285,17 +287,22 @@ public class LanternServer implements Server {
     }
 
     @Override
-    public ChunkLoadService getChunkLoadService() {
-        return null; //TODO: Implement
-    }
-
-    @Override
     public double getTicksPerSecond() {
         return 0; //TODO: Implement
     }
 
     @Override
     public Optional<ResourcePack> getDefaultResourcePack() {
+        return null; //TODO: Implement
+    }
+
+    @Override
+    public ChunkTicketManager getChunkTicketManager() {
+        return null; //TODO: Implement
+    }
+
+    @Override
+    public GameProfileManager getGameProfileManager() {
         return null; //TODO: Implement
     }
 }

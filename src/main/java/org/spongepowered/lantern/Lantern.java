@@ -1,7 +1,7 @@
 package org.spongepowered.lantern;
 
-import static org.spongepowered.lantern.Sponge.ECOSYSTEM_NAME;
-import static org.spongepowered.lantern.Sponge.IMPLEMENTATION_VERSION;
+import static org.spongepowered.lantern.SpongeImpl.ECOSYSTEM_ID;
+import static org.spongepowered.lantern.SpongeImpl.ECOSYSTEM_NAME;
 
 import com.google.common.base.Throwables;
 import com.google.inject.Guice;
@@ -25,6 +25,7 @@ import org.spongepowered.lantern.plugin.LanternPluginManager;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 
 public class Lantern implements PluginContainer {
 
@@ -38,23 +39,23 @@ public class Lantern implements PluginContainer {
 
 
     private Lantern() {
-        Guice.createInjector(new LanternGuiceModule(this)).getInstance(Sponge.class);
+        Guice.createInjector(new LanternGuiceModule(this)).getInstance(SpongeImpl.class);
 
-        this.game = Sponge.getGame();
+        this.game = SpongeImpl.getGame();
 
         preInit();
 
         init();
 
-        Sponge.getGame().setServer(new LanternServer());
+        SpongeImpl.getGame().setServer(new LanternServer());
     }
 
     public void preInit() {
         try {
-            Sponge.getLogger().info("Loading Sponge...");
+            SpongeImpl.getLogger().info("Loading Sponge...");
 
-            Path gameDir = Sponge.getGameDirectory();
-            Path pluginsDir = Sponge.getPluginsDirectory();
+            Path gameDir = SpongeImpl.getGameDirectory();
+            Path pluginsDir = SpongeImpl.getPluginsDirectory();
             Files.createDirectories(pluginsDir);
 
             // TODO: Register services
@@ -64,10 +65,10 @@ public class Lantern implements PluginContainer {
             this.game.getEventManager().registerListeners(this, this);
             this.game.getEventManager().registerListeners(this, this.game.getRegistry());
 
-            Sponge.getLogger().info("Loading plugins...");
+            SpongeImpl.getLogger().info("Loading plugins...");
             ((LanternPluginManager) this.game.getPluginManager()).loadPlugins();
             postState(GameConstructionEvent.class, GameState.CONSTRUCTION);
-            Sponge.getLogger().info("Initializing plugins...");
+            SpongeImpl.getLogger().info("Initializing plugins...");
             postState(GamePreInitializationEvent.class, GameState.PRE_INITIALIZATION);
 
             //TODO: register permission calculator
@@ -88,7 +89,7 @@ public class Lantern implements PluginContainer {
 
         postState(GamePostInitializationEvent.class, GameState.POST_INITIALIZATION);
 
-        Sponge.getLogger().info("Successfully loaded and initialized plugins.");
+        SpongeImpl.getLogger().info("Successfully loaded and initialized plugins.");
 
         postState(GameLoadCompleteEvent.class, GameState.LOAD_COMPLETE);
     }
@@ -109,32 +110,32 @@ public class Lantern implements PluginContainer {
     }
 
     public void postState(Class<? extends GameStateEvent> type, GameState state) {
-        Sponge.getGame().setState(state);
+        SpongeImpl.getGame().setState(state);
         postEvent(SpongeEventFactoryUtils.createState(type, this.game));
     }
 
     public static boolean postEvent(Event event) {
-        return Sponge.getGame().getEventManager().post(event);
+        return SpongeImpl.getGame().getEventManager().post(event);
     }
 
     @Override
     public String getId() {
-        return ECOSYSTEM_NAME;
+        return ECOSYSTEM_ID;
     }
 
     @Override
     public String getName() {
-        return ECOSYSTEM_NAME;
+        return SpongeVersion.IMPLEMENTATION_NAME.orElse("Lantern");
     }
 
     @Override
     public String getVersion() {
-        return IMPLEMENTATION_VERSION;
+        return SpongeVersion.IMPLEMENTATION_VERSION;
     }
 
     @Override
-    public Object getInstance() {
-        return this;
+    public Optional<Object> getInstance() {
+        return Optional.of(this);
     }
 
 }

@@ -12,7 +12,7 @@ import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Queries;
-import org.spongepowered.lantern.Sponge;
+import org.spongepowered.lantern.SpongeImpl;
 import org.spongepowered.lantern.block.tileentity.LanternTileEntity;
 import org.spongepowered.lantern.entity.LanternEntity;
 import org.spongepowered.lantern.io.entity.EntityStorage;
@@ -134,9 +134,9 @@ public final class AnvilChunkIoService implements ChunkIoService {
                 } catch (Exception e) {
                     String id = entityTag.getString(ENTITY_ID).orElse("<missing>");
                     if (e.getMessage() != null && e.getMessage().startsWith("Unknown entity type to load:")) {
-                        Sponge.getLogger().warn("Unknown entity in " + chunk + ": " + id);
+                        SpongeImpl.getLogger().warn("Unknown entity in " + chunk + ": " + id);
                     } else {
-                        Sponge.getLogger().warn("Error loading entity in " + chunk + ": " + id, e);
+                        SpongeImpl.getLogger().warn("Error loading entity in " + chunk + ": " + id, e);
                     }
                 }
             }
@@ -156,11 +156,11 @@ public final class AnvilChunkIoService implements ChunkIoService {
                     ((LanternTileEntity) tileEntity.get()).loadNbt(tileEntityTag);
                 } catch (Exception ex) {
                     String id = tileEntityTag.getString(ENTITY_ID).orElse("<missing>");
-                    Sponge.getLogger().error("Error loading tile entity at " + tileEntity.get().getLocation().getBlockPosition() + ": " + id, ex);
+                    SpongeImpl.getLogger().error("Error loading tile entity at " + tileEntity.get().getLocation().getBlockPosition() + ": " + id, ex);
                 }
             } else {
                 String id = tileEntityTag.getString(ENTITY_ID).orElse("<missing>");
-                Sponge.getLogger().warn("Unknown tile entity at " + chunk.getWorld().getName() + "," + tx + "," + ty + "," + tz + ": " + id);
+                SpongeImpl.getLogger().warn("Unknown tile entity at " + chunk.getWorld().getName() + "," + tx + "," + ty + "," + tz + ": " + id);
             }
         }
 
@@ -240,7 +240,7 @@ public final class AnvilChunkIoService implements ChunkIoService {
                 EntityStorage.save(entity, tag);
                 entities.add(tag);
             } catch (Exception e) {
-                Sponge.getLogger().warn("Error saving " + entity + " in " + chunk, e);
+                SpongeImpl.getLogger().warn("Error saving " + entity + " in " + chunk, e);
             }
         }
         levelTags.set(ENTITIES, entities);
@@ -253,7 +253,7 @@ public final class AnvilChunkIoService implements ChunkIoService {
                 entity.saveNbt(tag);
                 tileEntities.add(tag);
             } catch (Exception ex) {
-                Sponge.getLogger().error("Error saving tile entity at " + entity.getBlock(), ex);
+                SpongeImpl.getLogger().error("Error saving tile entity at " + entity.getBlock(), ex);
             }
         }
         levelTags.set(TILE_ENTITIES, tileEntities);

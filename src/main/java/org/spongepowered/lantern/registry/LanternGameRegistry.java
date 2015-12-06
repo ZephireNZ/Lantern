@@ -26,14 +26,19 @@ package org.spongepowered.lantern.registry;
 
 import com.google.inject.Singleton;
 import org.spongepowered.api.CatalogType;
-import org.spongepowered.api.GameProfile;
 import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.ImmutableDataRegistry;
 import org.spongepowered.api.data.manipulator.DataManipulatorRegistry;
+import org.spongepowered.api.data.value.ValueFactory;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.ai.task.AITaskType;
+import org.spongepowered.api.entity.ai.task.AbstractAITask;
+import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.recipe.RecipeRegistry;
+import org.spongepowered.api.network.status.Favicon;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.statistic.BlockStatistic;
@@ -42,7 +47,6 @@ import org.spongepowered.api.statistic.ItemStatistic;
 import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.api.statistic.StatisticGroup;
 import org.spongepowered.api.statistic.TeamStatistic;
-import org.spongepowered.api.status.Favicon;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.ResettableBuilder;
@@ -154,16 +158,6 @@ public class LanternGameRegistry implements GameRegistry {
     }
 
     @Override
-    public DataManipulatorRegistry getManipulatorRegistry() {
-        return null; //TODO: Implement
-    }
-
-    @Override
-    public ImmutableDataRegistry getImmutableDataRegistry() {
-        return null; //TODO: Implement
-    }
-
-    @Override
     public Optional<ResourcePack> getResourcePackById(String id) {
         return null; //TODO: Implement
     }
@@ -190,6 +184,16 @@ public class LanternGameRegistry implements GameRegistry {
 
     @Override
     public Optional<Translation> getTranslationById(String id) {
+        return null; //TODO: Implement
+    }
+
+    @Override
+    public AITaskType registerAITaskType(Object plugin, String id, String name, Class<? extends AbstractAITask<? extends Agent>> aiClass) {
+        return null; //TODO: Implement
+    }
+
+    @Override
+    public ValueFactory getValueFactory() {
         return null; //TODO: Implement
     }
 }
