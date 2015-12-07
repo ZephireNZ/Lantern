@@ -10,7 +10,7 @@ import org.spongepowered.api.world.storage.ChunkDataStream;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.storage.WorldStorage;
 import org.spongepowered.lantern.SpongeImpl;
-import org.spongepowered.lantern.service.scheduler.LanternScheduler;
+import org.spongepowered.lantern.scheduler.LanternScheduler;
 import org.spongepowered.lantern.util.nbt.NbtDataInputStream;
 import org.spongepowered.lantern.util.nbt.NbtDataOutputStream;
 

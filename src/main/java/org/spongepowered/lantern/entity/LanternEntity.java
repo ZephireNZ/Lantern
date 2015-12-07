@@ -15,12 +15,14 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.util.RelativePositions;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.lantern.data.LanternDataHolder;
 
 import java.util.EnumSet;
+import java.util.Random;
 import java.util.UUID;
 
 public abstract class LanternEntity extends LanternDataHolder implements Entity {
@@ -152,13 +154,18 @@ public abstract class LanternEntity extends LanternDataHolder implements Entity 
     }
 
     @Override
-    public boolean damage(double damage, Cause cause) {
-        return false; //TODO: Implement
+    public UUID getUniqueId() {
+        return null; //TODO: Implement
     }
 
     @Override
-    public UUID getUniqueId() {
+    public Random getRandom() {
         return null; //TODO: Implement
+    }
+
+    @Override
+    public boolean damage(double damage, DamageSource damageSource, Cause cause) {
+        return false; //TODO: Implement
     }
 
     //TODO

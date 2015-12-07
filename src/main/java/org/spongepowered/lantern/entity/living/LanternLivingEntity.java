@@ -10,7 +10,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
 import org.spongepowered.api.data.manipulator.mutable.entity.LeashData;
 import org.spongepowered.api.data.manipulator.mutable.entity.PersistingData;
 import org.spongepowered.api.entity.living.Living;
-import org.spongepowered.api.service.persistence.InvalidDataException;
+import org.spongepowered.api.util.persistence.InvalidDataException;
 import org.spongepowered.lantern.entity.LanternEntity;
 
 public abstract class LanternLivingEntity extends LanternEntity implements Living {

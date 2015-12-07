@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.lantern.configuration;
+package org.spongepowered.lantern.config;
 
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
@@ -32,8 +32,8 @@ import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.translator.ConfigurateTranslator;
-import org.spongepowered.api.service.persistence.DataBuilder;
-import org.spongepowered.api.service.persistence.SerializationManager;
+import org.spongepowered.api.util.persistence.DataBuilder;
+import org.spongepowered.api.util.persistence.SerializationManager;
 import org.spongepowered.lantern.SpongeImpl;
 
 import java.util.Optional;

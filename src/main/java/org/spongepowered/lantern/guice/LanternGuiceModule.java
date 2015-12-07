@@ -13,9 +13,9 @@ import org.spongepowered.api.Platform;
 import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
+import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.service.ServiceManager;
 import org.spongepowered.api.service.SimpleServiceManager;
-import org.spongepowered.api.service.event.EventManager;
 import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.lantern.Lantern;
 import org.spongepowered.lantern.LanternPlatform;
@@ -27,7 +27,7 @@ import org.spongepowered.lantern.registry.LanternGameRegistry;
 import org.spongepowered.lantern.event.LanternEventManager;
 import org.spongepowered.lantern.plugin.LanternPluginManager;
 import org.spongepowered.lantern.plugin.MinecraftPluginContainer;
-import org.spongepowered.lantern.service.scheduler.LanternScheduler;
+import org.spongepowered.lantern.scheduler.LanternScheduler;
 import org.spongepowered.lantern.world.LanternTeleportHelper;
 
 import java.nio.file.Path;
@@ -57,7 +57,7 @@ public class LanternGuiceModule extends AbstractModule {
         bind(GameRegistry.class).to(LanternGameRegistry.class).in(SINGLETON);
         bind(ServiceManager.class).to(SimpleServiceManager.class).in(SINGLETON);
         bind(TeleportHelper.class).to(LanternTeleportHelper.class).in(SINGLETON);
-        bind(SchedulerService.class).to(LanternScheduler.class).in(SINGLETON);
+        bind(Scheduler.class).to(LanternScheduler.class).in(SINGLETON);
 
         ConfigDirAnnotation sharedRoot = new ConfigDirAnnotation(true);
         bind(Path.class).annotatedWith(sharedRoot).toInstance(SpongeImpl.getConfigDirectory());

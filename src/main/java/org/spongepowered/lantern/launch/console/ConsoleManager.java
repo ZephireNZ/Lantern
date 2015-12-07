@@ -123,9 +123,9 @@ public final class ConsoleManager {
             try {
                 LanternScheduler.getInstance().createTaskBuilder()
                         .execute(() -> {
-                            candidates.addAll(SpongeImpl.getGame().getCommandDispatcher().getSuggestions(ConsoleManager.this.sender, buffer));
+                            candidates.addAll(SpongeImpl.getGame().getCommandManager().getSuggestions(ConsoleManager.this.sender, buffer));
                         })
-                        .submit(SpongeImpl.getSponge());
+                        .submit(SpongeImpl.getInstance());
 
                 return buffer.lastIndexOf(' ') + 1;
             } catch (Throwable t) {
@@ -150,9 +150,9 @@ public final class ConsoleManager {
                     final String tempCommand = command.trim();
                     LanternScheduler.getInstance().createTaskBuilder()
                             .execute(() -> {
-                                SpongeImpl.getGame().getCommandDispatcher().process(ConsoleManager.this.sender, tempCommand);
+                                SpongeImpl.getGame().getCommandManager().process(ConsoleManager.this.sender, tempCommand);
                             })
-                            .submit(SpongeImpl.getSponge());
+                            .submit(SpongeImpl.getInstance());
 
                 } catch (Exception ex) {
                     logger.log(Level.SEVERE, "Error while executing command: " + command, ex);

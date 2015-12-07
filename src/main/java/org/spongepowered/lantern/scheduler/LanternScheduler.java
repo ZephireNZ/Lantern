@@ -34,7 +34,6 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.lantern.SpongeImpl;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
-import org.spongepowered.lantern.SpongeImpl;
 
 import java.util.Iterator;
 import java.util.Optional;

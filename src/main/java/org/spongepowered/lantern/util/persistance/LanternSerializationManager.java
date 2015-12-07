@@ -22,16 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.lantern.service.persistance;
+package org.spongepowered.lantern.util.persistance;
 
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.service.persistence.DataBuilder;
-import org.spongepowered.api.service.persistence.SerializationManager;
-import org.spongepowered.lantern.configuration.DataSerializableTypeSerializer;
+import org.spongepowered.api.util.persistence.DataBuilder;
+import org.spongepowered.api.util.persistence.SerializationManager;
+import org.spongepowered.lantern.config.DataSerializableTypeSerializer;
 
 import java.util.Map;
 import java.util.Optional;

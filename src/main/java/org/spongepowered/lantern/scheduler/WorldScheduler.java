@@ -1,4 +1,4 @@
-package org.spongepowered.lantern.service.scheduler;
+package org.spongepowered.lantern.scheduler;
 
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.lantern.SpongeImpl;

@@ -5,7 +5,7 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.DataManipulatorRegistry;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.lantern.service.persistance.LanternSerializationManager;
+import org.spongepowered.lantern.util.persistance.LanternSerializationManager;
 
 import java.util.Map;
 import java.util.Optional;

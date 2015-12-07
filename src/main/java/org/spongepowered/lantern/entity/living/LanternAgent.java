@@ -5,8 +5,12 @@ import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.AgentData;
+import org.spongepowered.api.entity.ai.Goal;
+import org.spongepowered.api.entity.ai.GoalType;
 import org.spongepowered.api.entity.living.Agent;
-import org.spongepowered.api.service.persistence.InvalidDataException;
+import org.spongepowered.api.util.persistence.InvalidDataException;
+
+import java.util.Optional;
 
 public abstract class LanternAgent extends LanternLivingEntity implements Agent {
 
@@ -36,5 +40,10 @@ public abstract class LanternAgent extends LanternLivingEntity implements Agent 
     @Override
     public void setRawData(DataContainer container) throws InvalidDataException {
         super.setRawData(container); //TODO: Implement
+    }
+
+    @Override
+    public <T extends Agent> Optional<Goal<T>> getGoal(GoalType type) {
+        return null; //TODO: Implement
     }
 }
