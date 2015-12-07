@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.Order;
@@ -46,15 +45,13 @@ public final class RegisteredListener<T extends Event> implements LanternEventLi
 
     private final EventListener<? super T> listener;
 
-    private final boolean ignoreCancelled;
     private final boolean beforeModifications;
 
-    RegisteredListener(PluginContainer plugin, Class<T> eventClass, Order order, EventListener<? super T> listener, boolean ignoreCancelled, boolean beforeModifications) {
+    RegisteredListener(PluginContainer plugin, Class<T> eventClass, Order order, EventListener<? super T> listener, boolean beforeModifications) {
         this.plugin = checkNotNull(plugin, "plugin");
         this.eventClass = checkNotNull(eventClass, "eventClass");
         this.order = checkNotNull(order, "order");
         this.listener = checkNotNull(listener, "listener");
-        this.ignoreCancelled = ignoreCancelled;
         this.beforeModifications = beforeModifications;
     }
 
@@ -85,10 +82,6 @@ public final class RegisteredListener<T extends Event> implements LanternEventLi
 
     @Override
     public void handle(T event) throws Exception {
-        if (this.ignoreCancelled && event instanceof Cancellable && ((Cancellable) event).isCancelled()) {
-            return;
-        }
-
         this.listener.handle(event);
     }
 

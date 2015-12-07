@@ -33,8 +33,7 @@ import org.spongepowered.api.Game;
 import org.spongepowered.api.GameDictionary;
 import org.spongepowered.api.GameState;
 import org.spongepowered.api.Platform;
-import org.spongepowered.api.data.ImmutableDataRegistry;
-import org.spongepowered.api.data.manipulator.DataManipulatorRegistry;
+import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.data.property.PropertyRegistry;
 import org.spongepowered.api.command.CommandManager;
 import org.spongepowered.api.config.ConfigManager;
@@ -42,7 +41,6 @@ import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.network.ChannelRegistrar;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.service.ServiceManager;
-import org.spongepowered.api.util.persistence.SerializationManager;
 import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.lantern.registry.LanternGameRegistry;
 import org.spongepowered.lantern.scheduler.LanternScheduler;
@@ -151,27 +149,17 @@ public class LanternGame implements Game {
     }
 
     @Override
-    public SerializationManager getSerializationManager() {
-        return null; //TODO: Implement
-    }
-
-    @Override
     public PropertyRegistry getPropertyRegistry() {
         return null; //TODO: Implement
     }
 
     @Override
-    public DataManipulatorRegistry getManipulatorRegistry() {
-        return null; //TODO: Implement
-    }
-
-    @Override
-    public ImmutableDataRegistry getImmutableDataRegistry() {
-        return null; //TODO: Implement
-    }
-
-    @Override
     public ConfigManager getConfigManager() {
+        return null; //TODO: Implement
+    }
+
+    @Override
+    public DataManager getDataManager() {
         return null; //TODO: Implement
     }
 

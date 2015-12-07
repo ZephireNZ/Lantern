@@ -43,7 +43,7 @@ import org.spongepowered.api.util.persistence.InvalidDataException;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.lantern.SpongeImpl;
-import org.spongepowered.lantern.data.LanternDataRegistry;
+import org.spongepowered.lantern.data.LanternDataManager;
 
 import java.util.List;
 import java.util.Optional;
@@ -119,7 +119,7 @@ public class DataUtil {
             final DataView manipulatorView = view.getView(DataQueries.INTERNAL_DATA).get();
             try {
                 final Class<?> clazz = Class.forName(clazzName);
-                final Optional<DataManipulatorBuilder<?, ?>> optional = LanternDataRegistry.getInstance().getBuilder((Class) clazz);
+                final Optional<DataManipulatorBuilder<?, ?>> optional = LanternDataManager.getInstance().getBuilder((Class) clazz);
                 if (optional.isPresent()) {
                     final Optional<? extends DataManipulator<?, ?>> manipulatorOptional = optional.get().build(manipulatorView);
                     if (manipulatorOptional.isPresent()) {
@@ -143,7 +143,7 @@ public class DataUtil {
             final DataView manipulatorView = view.getView(DataQueries.INTERNAL_DATA).get();
             try {
                 final Class<?> clazz = Class.forName(clazzName);
-                final Optional<DataManipulatorBuilder<?, ?>> optional = LanternDataRegistry.getInstance().getBuilderForImmutable((Class) clazz);
+                final Optional<DataManipulatorBuilder<?, ?>> optional = LanternDataManager.getInstance().getImmutableBuilder((Class) clazz);
                 if (optional.isPresent()) {
                     final Optional<? extends DataManipulator<?, ?>> manipulatorOptional = optional.get().build(manipulatorView);
                     if (manipulatorOptional.isPresent()) {

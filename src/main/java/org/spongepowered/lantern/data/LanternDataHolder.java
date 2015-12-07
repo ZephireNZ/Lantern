@@ -6,7 +6,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataTransactionBuilder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
@@ -73,7 +72,7 @@ public abstract class LanternDataHolder implements DataHolder {
     public <T extends DataManipulator<?, ?>> Optional<T> getOrCreate(Class<T> containerClass) {
         if(get(containerClass).isPresent()) return get(containerClass);
 
-        Optional<DataManipulatorBuilder<?, ?>> optional = LanternDataRegistry.getInstance().getBuilder((Class) containerClass);
+        Optional<DataManipulatorBuilder<?, ?>> optional = LanternDataManager.getInstance().getBuilder((Class) containerClass);
         if (optional.isPresent()) {
             return Optional.of((T) optional.get().create());
         }
@@ -89,7 +88,7 @@ public abstract class LanternDataHolder implements DataHolder {
     @SuppressWarnings("unchecked")
     @Override
     public DataTransactionResult offer(DataManipulator<?, ?> valueContainer, MergeFunction function) {
-        DataTransactionBuilder builder = DataTransactionBuilder.builder();
+        DataTransactionResult.Builder builder = DataTransactionResult.builder();
         DataManipulator<?, ?> existing = get(valueContainer.getClass()).orElse(null);
         DataManipulator<?, ?> merged = function.merge(valueContainer, existing);
         containerStore.put((Class<? extends DataManipulator<?, ?>>) valueContainer.getClass(), merged);
@@ -105,10 +104,10 @@ public abstract class LanternDataHolder implements DataHolder {
         DataManipulator<?, ?> manipulator = containerStore.get(containerClass);
         if(manipulator != null) {
             this.containerStore.remove(containerClass);
-            return DataTransactionBuilder.builder().replace(manipulator.getValues())
+            return DataTransactionResult.builder().replace(manipulator.getValues())
                     .result(DataTransactionResult.Type.SUCCESS).build();
         } else {
-            return DataTransactionBuilder.failNoData();
+            return DataTransactionResult.failNoData();
         }
     }
 
@@ -119,21 +118,21 @@ public abstract class LanternDataHolder implements DataHolder {
             final DataManipulator<?, ?> manipulator = iterator.next();
             if (manipulator.getKeys().size() == 1 && manipulator.supports(key)) {
                 iterator.remove();
-                return DataTransactionBuilder.builder()
+                return DataTransactionResult.builder()
                         .replace(manipulator.getValues())
                         .result(DataTransactionResult.Type.SUCCESS)
                         .build();
             }
         }
-        return DataTransactionBuilder.failNoData();
+        return DataTransactionResult.failNoData();
     }
 
     @Override
     public DataTransactionResult undo(DataTransactionResult result) {
         if (result.getReplacedData().isEmpty() && result.getSuccessfulData().isEmpty()) {
-            return DataTransactionBuilder.successNoData();
+            return DataTransactionResult.successNoData();
         }
-        final DataTransactionBuilder builder = DataTransactionBuilder.builder();
+        final DataTransactionResult.Builder builder = DataTransactionResult.builder();
         for (ImmutableValue<?> replaced : result.getReplacedData()) {
             builder.absorbResult(offer(replaced));
         }

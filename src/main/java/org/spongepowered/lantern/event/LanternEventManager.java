@@ -20,6 +20,8 @@ import org.spongepowered.api.event.Order;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.lantern.SpongeImpl;
+import org.spongepowered.lantern.event.filter.FilterFactory;
+import org.spongepowered.lantern.event.gen.DefineableClassLoader;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -38,12 +40,15 @@ public class LanternEventManager implements EventManager {
     private final Object lock = new Object();
 
     private final PluginManager pluginManager;
-    private final AnnotatedEventListener.Factory handlerFactory = new ClassEventListenerFactory("org.spongepowered.common.event.listener");
+    private final DefineableClassLoader classLoader = new DefineableClassLoader(getClass().getClassLoader());
+    private final AnnotatedEventListener.Factory handlerFactory = new ClassEventListenerFactory("org.spongepowered.common.event.listener",
+            new FilterFactory("org.spongepowered.lantern.event.filters", classLoader), classLoader);
     private final Multimap<Class<?>, RegisteredListener<?>> handlersByEvent = HashMultimap.create();
 
     /**
      * A cache of all the handlers for an event type for quick event posting.
-     * <p>The cache is currently entirely invalidated if handlers are added or removed.</p>
+     * <p>The cache is currently entirely invalidated if handlers are added or
+     * removed.</p>
      */
     private final LoadingCache<Class<? extends Event>, RegisteredListener.Cache> handlersCache =
             CacheBuilder.newBuilder().build(new CacheLoader<Class<? extends Event>, RegisteredListener.Cache>() {
@@ -82,7 +87,7 @@ public class LanternEventManager implements EventManager {
         }
 
         Class<?>[] parameters = method.getParameterTypes();
-        return parameters.length == 1 && Event.class.isAssignableFrom(parameters[0]);
+        return parameters.length >= 1 && Event.class.isAssignableFrom(parameters[0]);
     }
 
     private void register(RegisteredListener<?> handler) {
@@ -139,12 +144,12 @@ public class LanternEventManager implements EventManager {
 
     private static <T extends Event> RegisteredListener<T> createRegistration(PluginContainer plugin, Class<T> eventClass, Listener listener,
                                                                               EventListener<? super T> handler) {
-        return createRegistration(plugin, eventClass, listener.order(), listener.ignoreCancelled(), listener.beforeModifications(), handler);
+        return createRegistration(plugin, eventClass, listener.order(), listener.beforeModifications(), handler);
     }
 
     private static <T extends Event> RegisteredListener<T> createRegistration(PluginContainer plugin, Class<T> eventClass, Order order,
-                                                                              boolean ignoreCancelled, boolean beforeModifications, EventListener<? super T> handler) {
-        return new RegisteredListener<>(plugin, eventClass, order, handler, ignoreCancelled, beforeModifications);
+                                                                              boolean beforeModifications, EventListener<? super T> handler) {
+        return new RegisteredListener<>(plugin, eventClass, order, handler, beforeModifications);
     }
 
     private PluginContainer getPlugin(Object plugin) {
@@ -165,13 +170,13 @@ public class LanternEventManager implements EventManager {
 
     @Override
     public <T extends Event> void registerListener(Object plugin, Class<T> eventClass, Order order, EventListener<? super T> handler) {
-        register(createRegistration(getPlugin(plugin), eventClass, order, false, false, handler));
+        register(createRegistration(getPlugin(plugin), eventClass, order, false, handler));
     }
 
     @Override
     public <T extends Event> void registerListener(Object plugin, Class<T> eventClass, Order order, boolean beforeModifications,
                                                    EventListener<? super T> handler) {
-        register(createRegistration(getPlugin(plugin), eventClass, order, false, beforeModifications, handler));
+        register(createRegistration(getPlugin(plugin), eventClass, order, beforeModifications, handler));
     }
 
     private void unregister(Predicate<RegisteredListener<?>> unregister) {
