@@ -26,16 +26,21 @@ package org.spongepowered.lantern;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import org.spongepowered.api.Server;
+import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.resourcepack.ResourcePack;
-import org.spongepowered.api.service.world.ChunkLoadService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.sink.MessageSink;
-import org.spongepowered.api.util.command.source.ConsoleSource;
+import org.spongepowered.api.world.ChunkTicketManager;
+import org.spongepowered.api.world.DimensionTypes;
+import org.spongepowered.api.world.GeneratorType;
+import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldCreationSettings;
 import org.spongepowered.api.world.storage.ChunkLayout;
 import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.lantern.config.LanternConfig;
 import org.spongepowered.lantern.launch.console.ConsoleManager;
 
 import java.io.IOException;
@@ -65,6 +70,8 @@ public class LanternServer implements Server {
     public void start() {
         consoleManager.startConsole();
         consoleManager.startFile(SpongeImpl.getGlobalConfig().getConfig().getLogFile());
+
+        //TODO: Fire AboutToStart
 
         //TODO: Fire AboutToStart
 
@@ -256,17 +263,22 @@ public class LanternServer implements Server {
     }
 
     @Override
-    public ChunkLoadService getChunkLoadService() {
-        return null; //TODO: Implement
-    }
-
-    @Override
     public double getTicksPerSecond() {
         return 0; //TODO: Implement
     }
 
     @Override
     public Optional<ResourcePack> getDefaultResourcePack() {
+        return null; //TODO: Implement
+    }
+
+    @Override
+    public ChunkTicketManager getChunkTicketManager() {
+        return null; //TODO: Implement
+    }
+
+    @Override
+    public GameProfileManager getGameProfileManager() {
         return null; //TODO: Implement
     }
 }

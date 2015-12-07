@@ -1,4 +1,4 @@
-package org.spongepowered.lantern.configuration;
+package org.spongepowered.lantern.config;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;

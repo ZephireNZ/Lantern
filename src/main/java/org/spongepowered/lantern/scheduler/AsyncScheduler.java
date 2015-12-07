@@ -22,9 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.lantern.service.scheduler;
+package org.spongepowered.lantern.scheduler;
 
-import org.spongepowered.api.service.scheduler.Task;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.lantern.SpongeImpl;
 
 import java.util.Set;

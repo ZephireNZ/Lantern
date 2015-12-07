@@ -22,4 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.lantern.service.persistance;
+package org.spongepowered.lantern;
+
+import static com.google.common.base.Objects.firstNonNull;
+
+import org.spongepowered.api.MinecraftVersion;
+
+import java.util.Optional;
+
+public final class SpongeVersion {
+
+    // TODO: Keep up to date
+    public static final MinecraftVersion MINECRAFT_VERSION = new LanternMinecraftVersion("1.8", 47);
+
+    public static final String API_NAME = firstNonNull(getPackage().getSpecificationTitle(), SpongeImpl.API_NAME);
+    public static final String API_VERSION = firstNonNull(getPackage().getSpecificationVersion(), "DEV");
+
+    public static final Optional<String> IMPLEMENTATION_NAME = Optional.ofNullable(getPackage().getImplementationTitle());
+    public static final String IMPLEMENTATION_VERSION =  firstNonNull(getPackage().getImplementationVersion(), "DEV");
+
+    private SpongeVersion() {
+    }
+
+    private static Package getPackage() {
+        return SpongeVersion.class.getPackage();
+    }
+
+}

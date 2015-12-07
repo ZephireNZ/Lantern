@@ -3,9 +3,9 @@ package org.spongepowered.lantern.launch.console;
 import jline.console.ConsoleReader;
 import jline.console.completer.Completer;
 import org.fusesource.jansi.AnsiConsole;
-import org.spongepowered.api.util.command.source.ConsoleSource;
+import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.lantern.SpongeImpl;
-import org.spongepowered.lantern.service.scheduler.LanternScheduler;
+import org.spongepowered.lantern.scheduler.LanternScheduler;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;

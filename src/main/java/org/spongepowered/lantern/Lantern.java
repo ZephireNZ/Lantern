@@ -1,7 +1,7 @@
 package org.spongepowered.lantern;
 
+import static org.spongepowered.lantern.SpongeImpl.ECOSYSTEM_ID;
 import static org.spongepowered.lantern.SpongeImpl.ECOSYSTEM_NAME;
-import static org.spongepowered.lantern.SpongeImpl.IMPLEMENTATION_VERSION;
 
 import com.google.common.base.Throwables;
 import com.google.inject.Guice;
@@ -27,6 +27,7 @@ import org.spongepowered.lantern.registry.RegistryHelper;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 
 public class Lantern implements PluginContainer {
 
@@ -126,22 +127,22 @@ public class Lantern implements PluginContainer {
 
     @Override
     public String getId() {
-        return ECOSYSTEM_NAME;
+        return ECOSYSTEM_ID;
     }
 
     @Override
     public String getName() {
-        return ECOSYSTEM_NAME;
+        return SpongeVersion.IMPLEMENTATION_NAME.orElse("Lantern");
     }
 
     @Override
     public String getVersion() {
-        return IMPLEMENTATION_VERSION;
+        return SpongeVersion.IMPLEMENTATION_VERSION;
     }
 
     @Override
-    public Object getInstance() {
-        return this;
+    public Optional<Object> getInstance() {
+        return Optional.of(this);
     }
 
 }

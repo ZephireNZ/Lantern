@@ -39,7 +39,7 @@ public class LanternPluginManager implements PluginManager {
 
     private void registerPlugin(PluginContainer plugin) {
         this.plugins.put(plugin.getId(), plugin);
-        this.pluginInstances.put(plugin.getInstance(), plugin);
+        this.pluginInstances.put(plugin.getInstance().get(), plugin);
     }
 
     public void loadPlugins() throws IOException {
@@ -77,7 +77,7 @@ public class LanternPluginManager implements PluginManager {
                 Class<?> pluginClass = Class.forName(plugin);
                 LanternPluginContainer container = new LanternPluginContainer(pluginClass);
                 registerPlugin(container);
-                SpongeImpl.getGame().getEventManager().registerListeners(container, container.getInstance());
+                SpongeImpl.getGame().getEventManager().registerListeners(container, container.getInstance().get());
 
                 SpongeImpl.getLogger().info("Loaded plugin: {} {} (from {})", container.getName(), container.getVersion(), source);
             } catch (Throwable e) {
@@ -104,7 +104,7 @@ public class LanternPluginManager implements PluginManager {
 
     @Override
     public Logger getLogger(PluginContainer plugin) {
-        return ((LanternPluginContainer) plugin).getLogger();
+        return plugin.getLogger();
     }
 
     @Override

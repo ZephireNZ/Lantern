@@ -22,12 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.lantern.service.scheduler;
+package org.spongepowered.lantern.scheduler;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.service.scheduler.Task;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.lantern.SpongeImpl;
 
 import java.util.Map;

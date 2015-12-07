@@ -14,11 +14,11 @@ import com.google.inject.Singleton;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventListener;
+import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
-import org.spongepowered.api.service.event.EventManager;
 import org.spongepowered.lantern.SpongeImpl;
 
 import java.lang.reflect.Method;

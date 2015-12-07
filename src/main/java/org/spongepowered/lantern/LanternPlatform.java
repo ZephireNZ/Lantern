@@ -24,30 +24,37 @@
  */
 package org.spongepowered.lantern;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.Platform;
+import org.spongepowered.api.plugin.PluginContainer;
 
 import java.util.Map;
 
+@Singleton
 public class LanternPlatform implements Platform {
 
     private final MinecraftVersion version;
-    private final String apiVersion;
-    private final String implVersion;
     private final Map<String, Object> platformMap;
+    private final PluginContainer api;
+    private final PluginContainer impl;
 
-    public LanternPlatform(MinecraftVersion version, String apiVersion, String implVersion) {
+    @Inject
+    public LanternPlatform(MinecraftVersion version, @Named(SpongeImpl.ECOSYSTEM_NAME) PluginContainer impl, @Named(SpongeImpl.API_NAME) PluginContainer api) {
         this.version = version;
-        this.apiVersion = apiVersion;
-        this.implVersion = implVersion;
+        this.api = api;
+        this.impl = impl;
 
         platformMap = ImmutableMap.<String, Object>builder()
-                .put("Name", this.getName())
                 .put("Type", this.getType())
-                .put("ExecutionType", this.getExecutionType())
-                .put("ApiVersion", this.getApiVersion())
-                .put("ImplementationVersion", this.getVersion())
+                .put("ApiName", this.api.getName())
+                .put("ApiVersion", this.api.getVersion())
+                .put("ImplementationName", this.impl.getName())
+                .put("ImplementationVersion", this.api.getVersion())
                 .put("MinecraftVersion", this.getMinecraftVersion())
                 .build();
     }
@@ -63,18 +70,13 @@ public class LanternPlatform implements Platform {
     }
 
     @Override
-    public String getName() {
-        return "Lantern";
+    public PluginContainer getApi() {
+        return this.api;
     }
 
     @Override
-    public String getVersion() {
-        return this.implVersion;
-    }
-
-    @Override
-    public String getApiVersion() {
-        return this.apiVersion;
+    public PluginContainer getImplementation() {
+        return this.impl;
     }
 
     @Override
@@ -85,5 +87,16 @@ public class LanternPlatform implements Platform {
     @Override
     public Map<String, Object> asMap() {
         return platformMap;
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("type", getType())
+                .add("executionType", getExecutionType())
+                .add("api", this.api)
+                .add("impl", this.impl)
+                .add("minecraftVersion", getMinecraftVersion())
+                .toString();
     }
 }

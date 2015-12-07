@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.lantern.service.scheduler;
+package org.spongepowered.lantern.scheduler;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -31,8 +31,9 @@ import com.google.common.collect.Sets;
 import com.google.inject.Singleton;
 import com.sun.istack.internal.Nullable;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.service.scheduler.SchedulerService;
-import org.spongepowered.api.service.scheduler.Task;
+import org.spongepowered.lantern.SpongeImpl;
+import org.spongepowered.api.scheduler.Scheduler;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.lantern.SpongeImpl;
 
 import java.util.Iterator;
@@ -49,7 +50,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Singleton
-public class LanternScheduler implements SchedulerService {
+public class LanternScheduler implements Scheduler {
 
     private static class LanternThreadFactory implements ThreadFactory {
         public static final LanternThreadFactory INSTANCE = new LanternThreadFactory();
