@@ -42,6 +42,7 @@ import org.spongepowered.api.network.ChannelRegistrar;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.service.ServiceManager;
 import org.spongepowered.api.world.TeleportHelper;
+import org.spongepowered.lantern.data.LanternDataManager;
 import org.spongepowered.lantern.registry.LanternGameRegistry;
 import org.spongepowered.lantern.scheduler.LanternScheduler;
 
@@ -160,7 +161,7 @@ public class LanternGame implements Game {
 
     @Override
     public DataManager getDataManager() {
-        return null; //TODO: Implement
+        return LanternDataManager.getInstance();
     }
 
     @Override
