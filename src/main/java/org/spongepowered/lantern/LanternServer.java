@@ -87,7 +87,7 @@ public class LanternServer implements Server {
         Path worlds = SpongeImpl.getGameDirectory();
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(worlds)) {
             stream.forEach(world -> {
-                Path spongeFile = worlds.resolve("level_sponge.dat");
+                Path spongeFile = world.resolve("level_sponge.dat");
                 if(!Files.exists(spongeFile)) return;
 
                 loadWorld(world.getFileName().toString());
