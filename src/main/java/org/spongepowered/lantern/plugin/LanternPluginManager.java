@@ -39,7 +39,7 @@ public class LanternPluginManager implements PluginManager {
 
     private void registerPlugin(PluginContainer plugin) {
         this.plugins.put(plugin.getId(), plugin);
-        this.pluginInstances.put(plugin.getInstance().get(), plugin);
+        plugin.getInstance().ifPresent(instance -> this.pluginInstances.put(instance, plugin));
     }
 
     public void loadPlugins() throws IOException {
