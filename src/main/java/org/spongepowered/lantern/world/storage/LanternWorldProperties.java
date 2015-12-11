@@ -643,19 +643,19 @@ public class LanternWorldProperties implements WorldProperties {
 
     @Override
     public DataContainer getAdditionalProperties() {
-        DataContainer copy = this.spongeData.copy(); // TODO: Deep copy?
+        DataContainer copy = this.spongeRootData.copy(); // TODO: Deep copy?
         copy.remove(SPONGE_DATA);
         return copy;
     }
 
     @Override
     public Optional<DataView> getPropertySection(DataQuery path) {
-        return this.spongeData.getView(path);
+        return this.spongeRootData.getView(path);
     }
 
     @Override
     public void setPropertySection(DataQuery path, DataView data) {
-        this.spongeData.set(path, data);
+        this.spongeRootData.set(path, data);
     }
 
     @Override
