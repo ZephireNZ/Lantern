@@ -5,6 +5,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.lantern.Lantern;
 import org.spongepowered.lantern.SpongeImpl;
 import org.spongepowered.lantern.world.storage.LanternWorldStorage;
 
@@ -67,7 +68,7 @@ public class ChunkManager {
             Optional<DataContainer> data = storage.getChunkData(location).get();
             if(data.isPresent()) {
                 chunk.load(data.get());
-                Sponge.getEventManager().post(SpongeEventFactory.createLoadChunkEvent(Sponge.getGame(), Cause.of(), chunk));
+                Lantern.post(SpongeEventFactory.createLoadChunkEvent(Sponge.getGame(), Cause.of(), chunk));
                 return true;
             }
         } catch (Exception e) {
@@ -87,7 +88,7 @@ public class ChunkManager {
             return false;
         }
 
-        Sponge.getEventManager().post(SpongeEventFactory.createLoadChunkEvent(Sponge.getGame(), Cause.of(), chunk));
+        Lantern.post(SpongeEventFactory.createLoadChunkEvent(Sponge.getGame(), Cause.of(), chunk));
         return true;
     }
 

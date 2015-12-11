@@ -1,7 +1,6 @@
 package org.spongepowered.lantern;
 
 import static org.spongepowered.lantern.SpongeImpl.ECOSYSTEM_ID;
-import static org.spongepowered.lantern.SpongeImpl.ECOSYSTEM_NAME;
 
 import com.google.common.base.Throwables;
 import com.google.inject.Guice;
@@ -118,10 +117,10 @@ public class Lantern implements PluginContainer {
 
     public void postState(Class<? extends GameStateEvent> type, GameState state) {
         SpongeImpl.getGame().setState(state);
-        postEvent(SpongeEventFactoryUtils.createState(type, this.game));
+        post(SpongeEventFactoryUtils.createState(type, this.game));
     }
 
-    public static boolean postEvent(Event event) {
+    public static boolean post(Event event) {
         return SpongeImpl.getGame().getEventManager().post(event);
     }
 
