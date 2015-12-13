@@ -91,6 +91,9 @@ public class NbtDataOutputStream implements Closeable {
 
         switch (type) {
             case BYTE:
+                if(object instanceof Boolean) {
+                    object = (boolean) object ? (byte) 1 : (byte) 0;
+                }
                 os.writeByte((byte) object);
                 break;
 
@@ -157,7 +160,7 @@ public class NbtDataOutputStream implements Closeable {
                 if(object instanceof DataView) {
                     map = Maps.newHashMap();
                     for(DataQuery query : ((DataView) object).getValues(false).keySet()) {
-                        map.put(query.toString(), ((DataView) object).get(query));
+                        map.put(query.toString(), ((DataView) object).get(query).get());
                     }
                 } else {
                     map = (Map<String, Object>) object;
@@ -182,7 +185,7 @@ public class NbtDataOutputStream implements Closeable {
     }
 
     public TagType getType(Object object) {
-        if (object instanceof Byte) {
+        if (object instanceof Byte || object instanceof Boolean) {
             return TagType.BYTE;
         } else if (object instanceof Short) {
             return TagType.SHORT;

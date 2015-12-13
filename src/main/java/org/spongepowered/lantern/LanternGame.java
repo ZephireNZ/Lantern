@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.GameDictionary;
 import org.spongepowered.api.GameState;
@@ -48,6 +49,7 @@ import org.spongepowered.lantern.scheduler.LanternScheduler;
 
 import java.nio.file.Path;
 
+@Singleton
 public class LanternGame implements Game {
 
     private final Platform platform;

@@ -122,4 +122,8 @@ public class LanternDataManager implements DataManager {
     public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<DataManipulatorBuilder<T, I>> getImmutableManipulatorBuilder(Class<I> immutableManipulatorClass) {
         return Optional.ofNullable((DataManipulatorBuilder<T, I>) this.immutableBuilderMap.get(checkNotNull(immutableManipulatorClass)));
     }
+
+    public static void finalizeRegistration() {
+        //TODO: Implement
+    }
 }

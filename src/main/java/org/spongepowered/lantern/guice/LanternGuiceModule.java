@@ -49,7 +49,6 @@ public class LanternGuiceModule extends AbstractModule {
         bind(PluginContainer.class).annotatedWith(named(SpongeImpl.API_NAME)).to(SpongeApiContainer.class).in(SINGLETON);
         bind(PluginContainer.class).annotatedWith(named("Minecraft")).to(MinecraftPluginContainer.class).in(SINGLETON);
 
-        bind(Game.class).to(LanternGame.class).in(SINGLETON);
         bind(MinecraftVersion.class).toInstance(SpongeVersion.MINECRAFT_VERSION);
         bind(Platform.class).to(LanternPlatform.class).in(SINGLETON);
         bind(PluginManager.class).to(LanternPluginManager.class).in(SINGLETON);
@@ -58,6 +57,7 @@ public class LanternGuiceModule extends AbstractModule {
         bind(ServiceManager.class).to(SimpleServiceManager.class).in(SINGLETON);
         bind(TeleportHelper.class).to(LanternTeleportHelper.class).in(SINGLETON);
         bind(Scheduler.class).to(LanternScheduler.class).in(SINGLETON);
+        bind(Game.class).to(LanternGame.class).in(SINGLETON);
 
         ConfigDirAnnotation sharedRoot = new ConfigDirAnnotation(true);
         bind(Path.class).annotatedWith(sharedRoot).toInstance(SpongeImpl.getConfigDirectory());

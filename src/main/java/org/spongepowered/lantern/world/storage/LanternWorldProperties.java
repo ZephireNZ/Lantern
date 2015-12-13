@@ -11,6 +11,7 @@ import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
@@ -26,6 +27,7 @@ import org.spongepowered.api.world.difficulty.Difficulties;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.lantern.SpongeImpl;
 import org.spongepowered.lantern.entity.living.player.LanternGameMode;
 import org.spongepowered.lantern.world.difficulty.LanternDifficulty;
 
@@ -101,6 +103,7 @@ public class LanternWorldProperties implements WorldProperties {
     private int rainTime;
     private boolean thundering;
     private int thunderTime;
+    private int clearTime;
     private GameMode gamemode;
     private boolean useMapFeatures;
     private boolean hardcore;
@@ -163,6 +166,7 @@ public class LanternWorldProperties implements WorldProperties {
         this.borderWarningDistance = 5;
         this.gamerules = new HashMap<>(); //TODO: Default gamerules
         this.generatorSettings = new MemoryDataContainer();
+        this.spawnPos = Vector3i.ZERO;
 
         this.spongeRootData = new MemoryDataContainer();
         this.rootData = new MemoryDataContainer();
@@ -230,7 +234,7 @@ public class LanternWorldProperties implements WorldProperties {
         this.levelData.set(LAST_PLAYED, System.currentTimeMillis());
         this.levelData.set(LEVEL_NAME, this.name);
         this.levelData.set(VERSION, 19133);
-        this.levelData.set(CLEAR_WEATHER_TIME, this);
+        this.levelData.set(CLEAR_WEATHER_TIME, this.clearTime);
         this.levelData.set(RAINING, this.raining);
         this.levelData.set(RAIN_TIME, this.rainTime);
         this.levelData.set(THUNDERING, this.thundering);
@@ -286,8 +290,9 @@ public class LanternWorldProperties implements WorldProperties {
 
         DataView level = this.levelData;
 
+        GameRegistry reg = SpongeImpl.getRegistry();
         this.name = level.getString(LEVEL_NAME).orElse(this.name);
-//        this.generator = null; TODO: Pending registry
+        this.generator = reg.getType(GeneratorType.class, level.getString(GENERATOR_NAME).orElse("DEFAULT")).orElse(GeneratorTypes.DEFAULT);
         this.seed = level.getLong(SEED).orElse(this.seed);
         this.totalTime = level.getLong(TIME).orElse(this.totalTime);
         this.worldTime = level.getLong(WORLD_TIME).orElse(this.worldTime);
@@ -296,6 +301,7 @@ public class LanternWorldProperties implements WorldProperties {
         this.rainTime = level.getInt(RAIN_TIME).orElse(this.rainTime);
         this.thundering = level.getBoolean(THUNDERING).orElse(this.thundering);
         this.thunderTime = level.getInt(THUNDER_TIME).orElse(this.thunderTime);
+        this.clearTime = level.getInt(CLEAR_WEATHER_TIME).orElse(this.clearTime);
 //        this.gamemode = null; TODO: Pending registry
         this.useMapFeatures = level.getBoolean(MAP_FEATURES).orElse(this.useMapFeatures);
         this.hardcore = level.getBoolean(HARDCORE).orElse(this.hardcore);
@@ -359,10 +365,12 @@ public class LanternWorldProperties implements WorldProperties {
     }
 
     public DataView getSpongeRoot() {
+        updateSpongeData();
         return this.spongeRootData;
     }
 
     public DataView getVanillaRoot() {
+        updateVanillaData();
         return this.rootData;
     }
 

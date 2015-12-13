@@ -24,7 +24,12 @@
  */
 package org.spongepowered.lantern.registry;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.google.common.reflect.TypeToken;
 import com.google.inject.Singleton;
+import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.block.BlockType;
@@ -50,39 +55,216 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.api.world.extent.ExtentBufferFactory;
+import org.spongepowered.api.world.gamerule.DefaultGameRules;
 import org.spongepowered.api.world.gen.PopulatorFactory;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
+import org.spongepowered.lantern.config.CatalogTypeTypeSerializer;
+import org.spongepowered.lantern.data.LanternDataManager;
+import org.spongepowered.lantern.registry.util.RegistrationDependency;
+import org.spongepowered.lantern.registry.util.RegistryModuleLoader;
+import org.spongepowered.lantern.util.graph.DirectedGraph;
+import org.spongepowered.lantern.util.graph.TopologicalOrder;
+import org.spongepowered.lantern.world.gen.WorldGeneratorRegistry;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 @Singleton
 public class LanternGameRegistry implements GameRegistry {
 
+    static {
+        TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(CatalogType.class), new CatalogTypeTypeSerializer());
+    }
+
+    private RegistrationPhase phase = RegistrationPhase.PRE_REGISTRY;
+
+    protected final Map<Class<? extends CatalogType>, CatalogRegistryModule<?>> catalogRegistryMap = new IdentityHashMap<>();
+    private List<Class<? extends RegistryModule>> orderedModules = new ArrayList<>();
+    final Map<Class<? extends RegistryModule>, RegistryModule> classMap = new IdentityHashMap<>();
+    private final Map<Class<?>, Supplier<?>> builderSupplierMap = new IdentityHashMap<>();
+    private final Set<RegistryModule> registryModules = new HashSet<>();
+
+    public LanternGameRegistry() {
+    }
+
+    public void preRegistryInit() {
+        LanternModuleRegistry.getInstance().registerDefaultModules();
+        final DirectedGraph<Class<? extends RegistryModule>> graph = new DirectedGraph<>();
+        for (RegistryModule module : this.registryModules) {
+            this.classMap.put(module.getClass(), module);
+            addToGraph(module, graph);
+        }
+        // Now we need ot do the catalog ones
+        for (CatalogRegistryModule<?> module : this.catalogRegistryMap.values()) {
+            this.classMap.put(module.getClass(), module);
+            addToGraph(module, graph);
+        }
+
+        this.orderedModules.addAll(TopologicalOrder.createOrderedLoad(graph));
+
+        registerModulePhase();
+    }
+
+    private void registerModulePhase() {
+        for (Class<? extends RegistryModule> moduleClass : this.orderedModules) {
+            if (!this.classMap.containsKey(moduleClass)) {
+                throw new IllegalStateException("Something funky happened!");
+            }
+            final RegistryModule module = this.classMap.get(moduleClass);
+            RegistryModuleLoader.tryModulePhaseRegistration(module);
+        }
+    }
+
+    private void registerAdditionalPhase() {
+        for (Class<? extends RegistryModule> moduleClass : this.orderedModules) {
+            final RegistryModule module = this.classMap.get(moduleClass);
+            RegistryModuleLoader.tryAdditionalRegistration(module);
+        }
+    }
+
+    private void addToGraph(RegistryModule module, DirectedGraph<Class<? extends RegistryModule>> graph) {
+        graph.add(module.getClass());
+        RegistrationDependency dependency = module.getClass().getAnnotation(RegistrationDependency.class);
+        if (dependency != null) {
+            for (Class<? extends RegistryModule> dependent : dependency.value()) {
+                graph.addEdge(checkNotNull(module.getClass(), "Dependency class was null!"), dependent);
+            }
+        }
+    }
+
+    public void preInit() {
+        this.phase = RegistrationPhase.PRE_INIT;
+//        DataRegistrar.setupSerialization(SpongeImpl.getGame());
+        registerModulePhase();
+
+    }
+
+    public void init() {
+        this.phase = RegistrationPhase.INIT;
+        registerModulePhase();
+    }
+
+    public void postInit() {
+        this.phase = RegistrationPhase.POST_INIT;
+        registerModulePhase();
+//        SpongePropertyRegistry.completeRegistration();
+        LanternDataManager.finalizeRegistration();
+        this.phase = RegistrationPhase.LOADED;
+    }
+
+    public void registerAdditionals() {
+        registerAdditionalPhase();
+    }
+
+    public <T extends CatalogType> LanternGameRegistry registerModule(Class<T> catalogClass, CatalogRegistryModule<T> registryModule) {
+        checkArgument(!this.catalogRegistryMap.containsKey(catalogClass), "Already registered a registry module!");
+        this.catalogRegistryMap.put(catalogClass, registryModule);
+        return this;
+    }
+
+    public LanternGameRegistry registerModule(RegistryModule module) {
+        this.registryModules.add(checkNotNull(module));
+        return this;
+    }
+
+    public <T> LanternGameRegistry registerBuilderSupplier(Class<T> builderClass, Supplier<? extends T> supplier) {
+        checkArgument(!this.builderSupplierMap.containsKey(builderClass), "Already registered a builder supplier!");
+        this.builderSupplierMap.put(builderClass, supplier);
+        return this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends CatalogType> CatalogRegistryModule<T> getRegistryModuleFor(Class<T> catalogClass) {
+        checkNotNull(catalogClass);
+        return (CatalogRegistryModule<T>) this.catalogRegistryMap.get(catalogClass);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends CatalogType> void registerAdditionalType(Class<T> catalogClass, T extra) {
+        CatalogRegistryModule<T> module = getRegistryModuleFor(catalogClass);
+        if (module instanceof AdditionalCatalogRegistryModule) {
+            ((AdditionalCatalogRegistryModule<T>) module).registerAdditionalCatalog(checkNotNull(extra));
+        }
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public <TUnknown, T extends CatalogType> boolean isAdditionalRegistered(Class<TUnknown> clazz, Class<T> catalogType) {
+        CatalogRegistryModule<T> module = getRegistryModuleFor(catalogType);
+        checkArgument(module instanceof ExtraClassCatalogRegistryModule);
+        ExtraClassCatalogRegistryModule<T, ?> classModule = (ExtraClassCatalogRegistryModule<T, ?>) module;
+        return classModule.hasRegistrationFor((Class) clazz);
+    }
+
+    public <TUnknown, T extends CatalogType> T getTranslated(Class<TUnknown> clazz, Class<T> catalogClazz) {
+        CatalogRegistryModule<T> module = getRegistryModuleFor(catalogClazz);
+        checkArgument(module instanceof ExtraClassCatalogRegistryModule);
+        ExtraClassCatalogRegistryModule<T, TUnknown> classModule = (ExtraClassCatalogRegistryModule<T, TUnknown>) module;
+        return classModule.getForClass(clazz);
+    }
+
+    @SuppressWarnings("unchecked")
     @Override
     public <T extends CatalogType> Optional<T> getType(Class<T> typeClass, String id) {
-        return null; //TODO: Implement
+        CatalogRegistryModule<T> registryModule = (CatalogRegistryModule<T>) this.catalogRegistryMap.get(typeClass);
+        if (registryModule == null) {
+            return Optional.empty();
+        } else {
+            if (BlockType.class.isAssignableFrom(typeClass) || ItemType.class.isAssignableFrom(typeClass)
+                    || EntityType.class.isAssignableFrom(typeClass)) {
+                if (!id.contains(":")) {
+                    id = "minecraft:" + id; // assume vanilla
+                }
+            }
+
+            return registryModule.getById(id.toLowerCase());
+        }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T extends CatalogType> Collection<T> getAllOf(Class<T> typeClass) {
-        return null; //TODO: Implement
+        CatalogRegistryModule<T> registryModule = (CatalogRegistryModule<T>) this.catalogRegistryMap.get(typeClass);
+        if (registryModule == null) {
+            return Collections.emptyList();
+        } else {
+            return registryModule.getAll();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T extends ResettableBuilder<? super T>> T createBuilder(Class<T> builderClass) {
+        checkNotNull(builderClass, "Builder class was null!");
+        checkArgument(this.builderSupplierMap.containsKey(builderClass), "Could not find a Supplier for the provided class: " + builderClass.getCanonicalName());
+        return (T) this.builderSupplierMap.get(builderClass).get();
     }
 
     @Override
-    public <T extends ResettableBuilder<? super T>> T createBuilder(Class<T> builderClass) throws IllegalArgumentException {
-        return null; //TODO: Implement
-    }
-
-    @Override
-    public Collection<String> getDefaultGameRules() {
-        return null; //TODO: Implement
+    public List<String> getDefaultGameRules() {
+        List<String> gameruleList = new ArrayList<>();
+        for (Field f : DefaultGameRules.class.getFields()) {
+            try {
+                gameruleList.add((String) f.get(null));
+            } catch (Exception e) {
+                // Ignoring error
+            }
+        }
+        return gameruleList;
     }
 
     @Override
@@ -167,7 +349,7 @@ public class LanternGameRegistry implements GameRegistry {
 
     @Override
     public void registerWorldGeneratorModifier(WorldGeneratorModifier modifier) {
-        //TODO: Implement
+        WorldGeneratorRegistry.getInstance().registerModifier(modifier);
     }
 
     @Override
@@ -193,5 +375,9 @@ public class LanternGameRegistry implements GameRegistry {
     @Override
     public ValueFactory getValueFactory() {
         return null; //TODO: Implement
+    }
+
+    public RegistrationPhase getPhase() {
+        return phase;
     }
 }

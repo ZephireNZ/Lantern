@@ -18,6 +18,7 @@ import org.spongepowered.api.world.WorldCreationSettings;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.lantern.SpongeImpl;
+import org.spongepowered.lantern.world.gen.WorldGeneratorRegistry;
 
 import java.util.Optional;
 import java.util.Random;

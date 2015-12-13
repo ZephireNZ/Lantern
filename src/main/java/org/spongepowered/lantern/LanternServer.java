@@ -44,6 +44,8 @@ import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.lantern.config.LanternConfig;
 import org.spongepowered.lantern.launch.console.ConsoleManager;
 import org.spongepowered.lantern.registry.type.world.WorldPropertyRegistryModule;
+import org.spongepowered.lantern.scheduler.LanternScheduler;
+import org.spongepowered.lantern.scheduler.WorldScheduler;
 import org.spongepowered.lantern.world.LanternWorld;
 import org.spongepowered.lantern.world.LanternWorldBuilder;
 import org.spongepowered.lantern.world.storage.LanternWorldProperties;
@@ -93,7 +95,7 @@ public class LanternServer implements Server {
     }
 
     public void loadAllWorlds() {
-        Path worlds = SpongeImpl.getGameDirectory();
+        Path worlds = SpongeImpl.getWorldDirectory();
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(worlds)) {
             stream.forEach(world -> {
                 Path spongeFile = world.resolve("level_sponge.dat");
@@ -107,11 +109,11 @@ public class LanternServer implements Server {
 
         LanternConfig.GlobalConfig config = SpongeImpl.getGlobalConfig().getConfig();
         LanternConfig.WorldConfig worldConfig = SpongeImpl.getWorldConfig(config.getLevelName(), DimensionTypes.OVERWORLD).getConfig();
-        LanternConfig.WorldConfig netherConfig = SpongeImpl.getWorldConfig(NETHER_NAME, DimensionTypes.OVERWORLD).getConfig();
-        LanternConfig.WorldConfig endConfig = SpongeImpl.getWorldConfig(THE_END_NAME, DimensionTypes.OVERWORLD).getConfig();
+        LanternConfig.WorldConfig netherConfig = SpongeImpl.getWorldConfig(NETHER_NAME, DimensionTypes.NETHER).getConfig();
+        LanternConfig.WorldConfig endConfig = SpongeImpl.getWorldConfig(THE_END_NAME, DimensionTypes.END).getConfig();
 
         // Load the default worlds if they aren't loaded already
-        WorldCreationSettings settings = new LanternWorldBuilder()
+        createWorld(new LanternWorldBuilder()
                 .name(config.getLevelName())
                 .enabled(true)
                 .loadsOnStartup(true)
@@ -122,13 +124,12 @@ public class LanternServer implements Server {
                 .dimensionType(DimensionTypes.OVERWORLD)
                 .hardcore(worldConfig.getWorld().isHardcore())
 //                .generatorSettings(worldConfig.getWorld().getGeneratorSettings()) //TODO: Generator Settings
-                .buildSettings();
-        // So we can use the root world directory
-        createWorld(settings, SpongeImpl.getWorldDirectory());
+                .buildSettings()
+        , SpongeImpl.getWorldDirectory());
         loadWorld(config.getLevelName(), SpongeImpl.getWorldDirectory());
 
 
-        new LanternWorldBuilder()
+        createWorld(new LanternWorldBuilder()
                 .name(NETHER_NAME)
                 .enabled(config.isAllowNether())
                 .loadsOnStartup(true)
@@ -139,9 +140,11 @@ public class LanternServer implements Server {
                 .dimensionType(DimensionTypes.NETHER)
                 .hardcore(netherConfig.getWorld().isHardcore())
 //                .generatorSettings(netherConfig.getWorld().getGeneratorSettings()) //TODO: Generator Settings
-                .build();
+                .buildSettings()
+        );
+        loadWorld(NETHER_NAME);
 
-        new LanternWorldBuilder()
+        createWorld(new LanternWorldBuilder()
                 .name(THE_END_NAME)
                 .enabled(config.isAllowEnd())
                 .loadsOnStartup(true)
@@ -152,7 +155,9 @@ public class LanternServer implements Server {
                 .dimensionType(DimensionTypes.END)
                 .hardcore(endConfig.getWorld().isHardcore())
 //                .generatorSettings(endConfig.getWorld().getGeneratorSettings()) //TODO: Generator Settings
-                .build();
+                .buildSettings()
+        );
+        loadWorld(THE_END_NAME);
     }
 
     public void bind() {
@@ -171,12 +176,12 @@ public class LanternServer implements Server {
 
     @Override
     public Optional<Player> getPlayer(UUID uniqueId) {
-        return null; //TODO: Implement
+        return Optional.empty(); //TODO: Implement
     }
 
     @Override
     public Optional<Player> getPlayer(String name) {
-        return null; //TODO: Implement
+        return Optional.empty(); //TODO: Implement
     }
 
     @Override
@@ -196,22 +201,22 @@ public class LanternServer implements Server {
 
     @Override
     public Optional<World> getWorld(UUID uniqueId) {
-        return null; //TODO: Implement
+        return Optional.empty(); //TODO: Implement
     }
 
     @Override
     public Optional<World> getWorld(String worldName) {
-        return null; //TODO: Implement
+        return Optional.empty(); //TODO: Implement
     }
 
     @Override
     public Optional<WorldProperties> getDefaultWorld() {
-        return null; //TODO: Implement
+        return Optional.empty(); //TODO: Implement
     }
 
     @Override
     public Optional<World> loadWorld(UUID uniqueId) {
-        return null; //TODO: Implement
+        return Optional.empty(); //TODO: Implement
     }
 
     @Override
@@ -290,7 +295,13 @@ public class LanternServer implements Server {
         if(existing.isPresent()) return Optional.of(existing.get().getProperties());
 
         LanternWorldStorage storage = new LanternWorldStorage(worldDir);
-        WorldProperties properties = storage.getWorldProperties();
+        LanternWorldProperties properties = new LanternWorldProperties(settings);
+        try {
+            storage.writeWorldProperties(properties);
+        } catch (IOException e) {
+            SpongeImpl.getLogger().error("Unable to create world properties for " + settings.getWorldName(), e);
+            return Optional.empty();
+        }
 
         // TODO: ConstructWorldEvent?
         if(!WorldPropertyRegistryModule.getInstance().isWorldRegistered(properties.getUniqueId())) {
@@ -383,7 +394,7 @@ public class LanternServer implements Server {
 
     @Override
     public Optional<ResourcePack> getDefaultResourcePack() {
-        return null; //TODO: Implement
+        return Optional.empty(); //TODO: Implement
     }
 
     @Override

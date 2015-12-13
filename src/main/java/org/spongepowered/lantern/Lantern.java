@@ -64,9 +64,10 @@ public class Lantern implements PluginContainer {
             Path pluginsDir = SpongeImpl.getPluginsDirectory();
             Files.createDirectories(pluginsDir);
 
-            // TODO: Register services
-            // TODO: Pre-registry init
-            // TODO: Pre-init registry
+            SpongeImpl.getRegistry().preRegistryInit();
+            // TODO: Init services
+            // TODO: Init commands
+            SpongeImpl.getRegistry().preInit();
 
             this.game.getEventManager().registerListeners(this, this);
             this.game.getEventManager().registerListeners(this, this.game.getRegistry());
@@ -84,14 +85,14 @@ public class Lantern implements PluginContainer {
     }
 
     public void init() {
-        //TODO: init registry
+        SpongeImpl.getRegistry().init();
         postState(GameInitializationEvent.class, GameState.INITIALIZATION);
 
         //TODO: Register permissions
 
-        // TODO: Post-init registry
+        SpongeImpl.getRegistry().postInit();
 
-        // TODO: Serialization complete
+        // TODO: Data complete registration
 
         postState(GamePostInitializationEvent.class, GameState.POST_INITIALIZATION);
 
