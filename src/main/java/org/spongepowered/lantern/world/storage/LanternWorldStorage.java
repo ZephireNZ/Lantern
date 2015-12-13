@@ -100,7 +100,7 @@ public class LanternWorldStorage implements WorldStorage {
         SpongeImpl.getLogger().error("Unable to access " + file + " for world " + worldDir.getFileName(), e);
     }
 
-    public void writeWorldData(LanternWorldProperties properties) throws IOException {
+    public void writeWorldProperties(LanternWorldProperties properties) throws IOException {
         try (NbtDataOutputStream nbtOut = new NbtDataOutputStream(Files.newOutputStream(worldDir.resolve("level.dat")))) {
             nbtOut.write(properties.getVanillaRoot());
         } catch (IOException e) {

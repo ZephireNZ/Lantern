@@ -22,16 +22,15 @@ public class LanternWorldCreationSettings implements WorldCreationSettings {
     private Collection<WorldGeneratorModifier> modifiers;
     private boolean mapFeatures;
     private boolean hardcore;
-    private boolean commandsAllowed;
-    private boolean bonusChest;
+    private boolean commandsAllowed = true; // Clientside only
+    private boolean bonusChest = false; // TODO
     private DimensionType dimension;
     private DataContainer generatorSettings;
 
     // One hell of a ctor...
     public LanternWorldCreationSettings(String name, boolean enabled, boolean loadOnStartup, boolean keepSpawnLoaded,
                                         long seed, GameMode gamemode, GeneratorType generator, Collection<WorldGeneratorModifier> modifiers,
-                                        boolean mapFeatures, boolean hardcore, boolean commandsAllowed, boolean bonusChest,
-                                        DimensionType dimension, DataContainer generatorSettings) {
+                                        boolean mapFeatures, boolean hardcore, DimensionType dimension, DataContainer generatorSettings) {
         this.name = name;
         this.enabled = enabled;
         this.loadOnStartup = loadOnStartup;

@@ -28,13 +28,14 @@ import com.google.common.util.concurrent.ListenableFuture;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.world.ChunkTicketManager;
 import org.spongepowered.api.world.DimensionTypes;
-import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldCreationSettings;
@@ -42,6 +43,11 @@ import org.spongepowered.api.world.storage.ChunkLayout;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.lantern.config.LanternConfig;
 import org.spongepowered.lantern.launch.console.ConsoleManager;
+import org.spongepowered.lantern.registry.type.world.WorldPropertyRegistryModule;
+import org.spongepowered.lantern.world.LanternWorld;
+import org.spongepowered.lantern.world.LanternWorldBuilder;
+import org.spongepowered.lantern.world.storage.LanternWorldProperties;
+import org.spongepowered.lantern.world.storage.LanternWorldStorage;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -53,6 +59,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class LanternServer implements Server {
+
+    public static final String NETHER_NAME = "DIM-1";
+    public static final String THE_END_NAME = "DIM1";
 
     /**
      * The console manager of this server.
@@ -95,7 +104,55 @@ public class LanternServer implements Server {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        // TODO: Load/Create the main world, nether and end
+
+        LanternConfig.GlobalConfig config = SpongeImpl.getGlobalConfig().getConfig();
+        LanternConfig.WorldConfig worldConfig = SpongeImpl.getWorldConfig(config.getLevelName(), DimensionTypes.OVERWORLD).getConfig();
+        LanternConfig.WorldConfig netherConfig = SpongeImpl.getWorldConfig(NETHER_NAME, DimensionTypes.OVERWORLD).getConfig();
+        LanternConfig.WorldConfig endConfig = SpongeImpl.getWorldConfig(THE_END_NAME, DimensionTypes.OVERWORLD).getConfig();
+
+        // Load the default worlds if they aren't loaded already
+        WorldCreationSettings settings = new LanternWorldBuilder()
+                .name(config.getLevelName())
+                .enabled(true)
+                .loadsOnStartup(true)
+                .keepsSpawnLoaded(true)
+                .seed(config.getLevelSeed())
+                .gameMode(config.getGamemode())
+                .generator(worldConfig.getWorld().getGenerator())
+                .dimensionType(DimensionTypes.OVERWORLD)
+                .hardcore(worldConfig.getWorld().isHardcore())
+//                .generatorSettings(worldConfig.getWorld().getGeneratorSettings()) //TODO: Generator Settings
+                .buildSettings();
+        // So we can use the root world directory
+        createWorld(settings, SpongeImpl.getWorldDirectory());
+        loadWorld(config.getLevelName(), SpongeImpl.getWorldDirectory());
+
+
+        new LanternWorldBuilder()
+                .name(NETHER_NAME)
+                .enabled(config.isAllowNether())
+                .loadsOnStartup(true)
+                .keepsSpawnLoaded(false)
+                .seed(config.getLevelSeed())
+                .gameMode(config.getGamemode())
+                .generator(GeneratorTypes.NETHER)
+                .dimensionType(DimensionTypes.NETHER)
+                .hardcore(netherConfig.getWorld().isHardcore())
+//                .generatorSettings(netherConfig.getWorld().getGeneratorSettings()) //TODO: Generator Settings
+                .build();
+
+        new LanternWorldBuilder()
+                .name(THE_END_NAME)
+                .enabled(config.isAllowEnd())
+                .loadsOnStartup(true)
+                .keepsSpawnLoaded(false)
+                .seed(config.getLevelSeed())
+                .gameMode(config.getGamemode())
+                .generator(GeneratorTypes.END)
+                .dimensionType(DimensionTypes.END)
+                .hardcore(endConfig.getWorld().isHardcore())
+//                .generatorSettings(endConfig.getWorld().getGeneratorSettings()) //TODO: Generator Settings
+                .build();
     }
 
     public void bind() {
@@ -153,18 +210,54 @@ public class LanternServer implements Server {
     }
 
     @Override
-    public Optional<World> loadWorld(String worldName) {
-        return null; //TODO: Implement
-    }
-
-    @Override
     public Optional<World> loadWorld(UUID uniqueId) {
         return null; //TODO: Implement
     }
 
     @Override
     public Optional<World> loadWorld(WorldProperties properties) {
-        return null; //TODO: Implement
+        if(properties == null) return Optional.empty();
+        return loadWorld(properties.getWorldName());
+    }
+
+    @Override
+    public Optional<World> loadWorld(String worldName) {
+        final Optional<World> existing = getWorld(worldName);
+        if(existing.isPresent()) return existing;
+
+        return loadWorld(worldName, SpongeImpl.getWorldDirectory().resolve(worldName));
+    }
+
+    public Optional<World> loadWorld(String worldName, Path worldFolder) {
+        final Optional<World> existing = getWorld(worldName);
+        if(existing.isPresent()) return existing;
+
+        if(Files.isRegularFile(worldFolder)) {
+            throw new IllegalArgumentException("File exists with the name '" + worldName + "' and isn't a folder");
+        }
+
+        LanternWorldStorage storage = new LanternWorldStorage(worldFolder);
+        Optional<WorldProperties> optProps = WorldPropertyRegistryModule.getInstance().getWorldProperties(worldName);
+        WorldProperties properties = optProps.orElse(storage.getWorldProperties());
+
+        if(!properties.isEnabled()) {
+            SpongeImpl.getLogger().error("Unable to load world " + worldName + ". World is disabled!");
+            return Optional.empty();
+        }
+
+        int dim = ((LanternWorldProperties) properties).getDimensionId();
+        //TODO: Register dimension ID?
+        if(!WorldPropertyRegistryModule.getInstance().isWorldRegistered(worldName)) {
+            WorldPropertyRegistryModule.getInstance().registerWorldProperties(properties);
+        }
+
+        WorldCreationSettings settings = new LanternWorldBuilder(properties).buildSettings();
+
+        LanternWorld world = new LanternWorld(settings, storage, properties);
+        //TODO: Init spawn?
+        Lantern.post(SpongeEventFactory.createLoadWorldEvent(SpongeImpl.getGame(), Cause.of(this), world));
+
+        return Optional.of(world);
     }
 
     @Override
@@ -184,7 +277,28 @@ public class LanternServer implements Server {
 
     @Override
     public Optional<WorldProperties> createWorld(WorldCreationSettings settings) {
-        return null; //TODO: Implement
+        String name = settings.getWorldName();
+        Optional<World> existing = getWorld(name);
+        if(existing.isPresent()) return Optional.of(existing.get().getProperties());
+
+        return createWorld(settings, SpongeImpl.getWorldDirectory().resolve(name));
+    }
+
+    public Optional<WorldProperties> createWorld(WorldCreationSettings settings, Path worldDir) {
+        String name = settings.getWorldName();
+        Optional<World> existing = getWorld(name);
+        if(existing.isPresent()) return Optional.of(existing.get().getProperties());
+
+        LanternWorldStorage storage = new LanternWorldStorage(worldDir);
+        WorldProperties properties = storage.getWorldProperties();
+
+        // TODO: ConstructWorldEvent?
+        if(!WorldPropertyRegistryModule.getInstance().isWorldRegistered(properties.getUniqueId())) {
+            WorldPropertyRegistryModule.getInstance().registerWorldProperties(properties);
+            return Optional.of(properties);
+        } else {
+            return WorldPropertyRegistryModule.getInstance().getWorldProperties(properties.getUniqueId());
+        }
     }
 
     @Override

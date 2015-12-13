@@ -16,7 +16,12 @@ import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.util.Functional;
+import org.spongepowered.api.world.GeneratorType;
+import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.lantern.SpongeImpl;
 import org.spongepowered.lantern.util.IpSet;
 
@@ -29,6 +34,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
 
@@ -288,9 +294,6 @@ public class LanternConfig<T extends LanternConfig.ConfigBase> {
         @Setting("level-seed")
         private String levelSeed = "";
 
-        @Setting("level-type")
-        private String levelType = "DEFAULT";
-
         @Setting("log-file")
         private String logFile = "logs/log-%D.txt";
 
@@ -396,20 +399,22 @@ public class LanternConfig<T extends LanternConfig.ConfigBase> {
             return forceGamemode;
         }
 
-        public String getGamemode() {
-            return gamemode;
+        public GameMode getGamemode() {
+            return Sponge.getRegistry().getType(GameMode.class, gamemode).orElse(GameModes.SURVIVAL);
+        }
+
+        public int getLevelSeed() {
+            if(levelSeed.equals("")) return new Random().nextInt();
+
+            try {
+                return Integer.parseInt(levelSeed);
+            } catch (NumberFormatException e) {
+                return levelSeed.hashCode();
+            }
         }
 
         public String getLevelName() {
             return levelName;
-        }
-
-        public String getLevelSeed() {
-            return levelSeed;
-        }
-
-        public String getLevelType() {
-            return levelType;
         }
 
         public Path getLogFile() {
@@ -986,6 +991,9 @@ public class LanternConfig<T extends LanternConfig.ConfigBase> {
         @Setting("view-distance")
         private int viewDistance = 10;
 
+        @Setting("level-type")
+        private String levelType = "DEFAULT";
+
         public boolean hasInfiniteWaterSource() {
             return this.infiniteWaterSource;
         }
@@ -1036,6 +1044,10 @@ public class LanternConfig<T extends LanternConfig.ConfigBase> {
 
         public int getViewDistance() {
             return viewDistance;
+        }
+
+        public GeneratorType getGenerator() {
+            return Sponge.getRegistry().getType(GeneratorType.class, levelType).orElse(GeneratorTypes.DEFAULT);
         }
     }
 

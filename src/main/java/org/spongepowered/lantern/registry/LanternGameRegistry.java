@@ -28,8 +28,6 @@ import com.google.inject.Singleton;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.data.ImmutableDataRegistry;
-import org.spongepowered.api.data.manipulator.DataManipulatorRegistry;
 import org.spongepowered.api.data.value.ValueFactory;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.ai.task.AITaskType;

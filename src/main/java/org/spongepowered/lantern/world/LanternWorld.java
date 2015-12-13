@@ -1,5 +1,7 @@
 package org.spongepowered.lantern.world;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
@@ -53,8 +55,8 @@ import org.spongepowered.api.world.extent.StorageType;
 import org.spongepowered.api.world.extent.UnmodifiableBiomeArea;
 import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
 import org.spongepowered.api.world.gen.WorldGenerator;
+import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.weather.Weather;
-import org.spongepowered.lantern.world.storage.LanternWorldProperties;
 import org.spongepowered.lantern.world.storage.LanternWorldStorage;
 
 import java.util.Collection;
@@ -66,10 +68,14 @@ import java.util.function.Predicate;
 
 public class LanternWorld implements World {
 
-    public LanternWorld(WorldCreationSettings settings) {
-//        this.name = settings.getWorldName();
-//        this.dimension = settings.getDimensionType();
-//        this.
+    private final WorldCreationSettings settings;
+    private final WorldProperties properties;
+    private final LanternWorldStorage storage;
+
+    public LanternWorld(WorldCreationSettings settings, LanternWorldStorage storage, WorldProperties properties) {
+        this.settings = checkNotNull(settings);
+        this.storage = checkNotNull(storage);
+        this.properties = checkNotNull(properties);
     }
 
     /**
@@ -166,7 +172,7 @@ public class LanternWorld implements World {
 
     @Override
     public LanternWorldStorage getWorldStorage() {
-        return null; //TODO: Implement
+        return this.storage;
     }
 
     @Override
@@ -181,12 +187,12 @@ public class LanternWorld implements World {
 
     @Override
     public WorldCreationSettings getCreationSettings() {
-        return null; //TODO: Implement
+        return this.settings;
     }
 
     @Override
-    public LanternWorldProperties getProperties() {
-        return null; //TODO: Implement
+    public WorldProperties getProperties() {
+        return this.properties;
     }
 
     @Override

@@ -3,6 +3,7 @@ package org.spongepowered.lantern;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -11,11 +12,13 @@ import org.apache.logging.log4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.ProviderExistsException;
+import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.lantern.config.LanternConfig;
 import org.spongepowered.lantern.registry.LanternGameRegistry;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -33,6 +36,9 @@ public class SpongeImpl {
     private static final Path configDir = gameDir.resolve("config");
     private static final Path pluginsDir = gameDir.resolve("mods");
     private static final Path modConfigDir = configDir.resolve(CONFIG_NAME); // We want to preserve configs
+    private static final Path worldDirectory = gameDir.resolve(getGlobalConfig().getConfig().getLevelName());
+
+    private static final Map<String, LanternConfig<LanternConfig.WorldConfig>> configs = Maps.newHashMap();
 
     @Nullable
     private static SpongeImpl instance;
@@ -118,11 +124,24 @@ public class SpongeImpl {
         return pluginsDir;
     }
 
+    public static Path getWorldDirectory() {
+        return worldDirectory;
+    }
+
     public static LanternConfig<LanternConfig.GlobalConfig> getGlobalConfig() {
         if (globalConfig == null) {
             globalConfig = new LanternConfig<>(LanternConfig.Type.GLOBAL, modConfigDir.resolve("global.conf"), CONFIG_NAME);
         }
 
         return globalConfig;
+    }
+
+    public static LanternConfig<LanternConfig.WorldConfig> getWorldConfig(String world, DimensionType dimension) {
+        if(configs.get(world) != null) {
+            return configs.get(world);
+        }
+
+        String dimensionName = dimension.getName().toLowerCase().replace(" ", "_").replace("[^A-Za-z0-9_]", "");
+        return new LanternConfig<>(LanternConfig.Type.WORLD, modConfigDir.resolve("worlds").resolve(dimensionName).resolve(world).resolve("world.conf"), CONFIG_NAME);
     }
 }

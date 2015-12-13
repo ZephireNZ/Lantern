@@ -68,7 +68,7 @@ public class ChunkManager {
             Optional<DataContainer> data = storage.getChunkData(location).get();
             if(data.isPresent()) {
                 chunk.load(data.get());
-                Lantern.post(SpongeEventFactory.createLoadChunkEvent(Sponge.getGame(), Cause.of(), chunk));
+                Lantern.post(SpongeEventFactory.createLoadChunkEvent(Sponge.getGame(), Cause.of(SpongeImpl.getGame().getServer()), chunk));
                 return true;
             }
         } catch (Exception e) {
@@ -88,7 +88,7 @@ public class ChunkManager {
             return false;
         }
 
-        Lantern.post(SpongeEventFactory.createLoadChunkEvent(Sponge.getGame(), Cause.of(), chunk));
+        Lantern.post(SpongeEventFactory.createLoadChunkEvent(Sponge.getGame(), Cause.of(SpongeImpl.getGame().getServer()), chunk));
         return true;
     }
 
