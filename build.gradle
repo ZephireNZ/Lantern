@@ -47,7 +47,7 @@ jar {
                 'Specification-Name': api.name,
                 'Specification-Version': api.version,
                 'Specification-Vendor': api.url,
-                'LanternMain-Class': 'org.spongepowered.lantern.launch.LanternMain'
+                'Main-Class': 'org.spongepowered.lantern.launch.LanternMain'
         )
     }
 }
