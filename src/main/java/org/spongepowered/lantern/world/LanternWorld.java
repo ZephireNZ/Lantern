@@ -87,12 +87,12 @@ public class LanternWorld implements World {
 
     @Override
     public Difficulty getDifficulty() {
-        return null; //TODO: Implement
+        return properties.getDifficulty();
     }
 
     @Override
     public String getName() {
-        return null; //TODO: Implement
+        return properties.getWorldName();
     }
 
     @Override

@@ -222,4 +222,7 @@ public class LanternScheduler implements Scheduler {
         return this.asyncScheduler.getExecutor();
     }
 
+    public WorldScheduler getWorldScheduler() {
+        return worldScheduler;
+    }
 }

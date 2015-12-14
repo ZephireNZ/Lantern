@@ -45,7 +45,6 @@ import org.spongepowered.lantern.config.LanternConfig;
 import org.spongepowered.lantern.launch.console.ConsoleManager;
 import org.spongepowered.lantern.registry.type.world.WorldPropertyRegistryModule;
 import org.spongepowered.lantern.scheduler.LanternScheduler;
-import org.spongepowered.lantern.scheduler.WorldScheduler;
 import org.spongepowered.lantern.world.LanternWorld;
 import org.spongepowered.lantern.world.LanternWorldBuilder;
 import org.spongepowered.lantern.world.storage.LanternWorldProperties;
@@ -57,6 +56,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -186,7 +186,7 @@ public class LanternServer implements Server {
 
     @Override
     public Collection<World> getWorlds() {
-        return null; //TODO: Implement
+        return Collections.unmodifiableCollection(LanternScheduler.getInstance().getWorldScheduler().getWorlds());
     }
 
     @Override
@@ -201,12 +201,18 @@ public class LanternServer implements Server {
 
     @Override
     public Optional<World> getWorld(UUID uniqueId) {
-        return Optional.empty(); //TODO: Implement
+        for(World world : getWorlds()) {
+            if(world.getUniqueId().equals(uniqueId)) return Optional.of(world);
+        }
+        return Optional.empty();
     }
 
     @Override
     public Optional<World> getWorld(String worldName) {
-        return Optional.empty(); //TODO: Implement
+        for(World world : getWorlds()) {
+            if(world.getName().equals(worldName)) return Optional.of(world);
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -259,6 +265,7 @@ public class LanternServer implements Server {
         WorldCreationSettings settings = new LanternWorldBuilder(properties).buildSettings();
 
         LanternWorld world = new LanternWorld(settings, storage, properties);
+        LanternScheduler.getInstance().getWorldScheduler().addWorld(world);
         //TODO: Init spawn?
         Lantern.post(SpongeEventFactory.createLoadWorldEvent(SpongeImpl.getGame(), Cause.of(this), world));
 
