@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Sets;
 import com.google.inject.Singleton;
-import com.sun.istack.internal.Nullable;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.lantern.SpongeImpl;
 import org.spongepowered.api.scheduler.Scheduler;
@@ -47,6 +46,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.annotation.Nullable;
 
 @Singleton
 public class LanternScheduler implements Scheduler {
