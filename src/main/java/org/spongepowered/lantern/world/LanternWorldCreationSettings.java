@@ -6,6 +6,7 @@ import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.WorldCreationSettings;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
+import org.spongepowered.api.world.storage.WorldProperties;
 
 import java.util.Collection;
 
@@ -27,6 +28,12 @@ public class LanternWorldCreationSettings implements WorldCreationSettings {
     private DimensionType dimension;
     private DataContainer generatorSettings;
 
+    public LanternWorldCreationSettings(WorldProperties props) {
+        this(props.getWorldName(), props.isEnabled(), props.loadOnStartup(), props.doesKeepSpawnLoaded(),
+                props.getSeed(), props.getGameMode(), props.getGeneratorType(), props.getGeneratorModifiers(),
+                props.usesMapFeatures(), props.isHardcore(), props.getDimensionType(), props.getGeneratorSettings());
+    }
+
     // One hell of a ctor...
     public LanternWorldCreationSettings(String name, boolean enabled, boolean loadOnStartup, boolean keepSpawnLoaded,
                                         long seed, GameMode gamemode, GeneratorType generator, Collection<WorldGeneratorModifier> modifiers,
@@ -41,8 +48,6 @@ public class LanternWorldCreationSettings implements WorldCreationSettings {
         this.modifiers = modifiers;
         this.mapFeatures = mapFeatures;
         this.hardcore = hardcore;
-        this.commandsAllowed = commandsAllowed;
-        this.bonusChest = bonusChest;
         this.dimension = dimension;
         this.generatorSettings = generatorSettings;
     }

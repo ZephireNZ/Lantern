@@ -264,7 +264,7 @@ public class LanternServer implements Server {
 
         WorldCreationSettings settings = new LanternWorldBuilder(properties).buildSettings();
 
-        LanternWorld world = new LanternWorld(settings, storage, properties);
+        LanternWorld world = new LanternWorld(storage, properties);
         LanternScheduler.getInstance().getWorldScheduler().addWorld(world);
         //TODO: Init spawn?
         Lantern.post(SpongeEventFactory.createLoadWorldEvent(SpongeImpl.getGame(), Cause.of(this), world));
@@ -274,12 +274,43 @@ public class LanternServer implements Server {
 
     @Override
     public Optional<WorldProperties> getWorldProperties(String worldName) {
-        return null; //TODO: Implement
+        Optional<WorldProperties> loaded = WorldPropertyRegistryModule.getInstance().getWorldProperties(worldName);
+        if(!loaded.isPresent()) return loaded;
+
+        Path worlds = SpongeImpl.getWorldDirectory();
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(worlds)) {
+            for(Path world : stream) {
+                if(!world.getFileName().toString().equals(worldName)) continue;
+
+                Path spongeFile = world.resolve("level_sponge.dat");
+                if(!Files.exists(spongeFile)) continue;
+                return Optional.of(new LanternWorldStorage(world).getWorldProperties());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return Optional.empty();
     }
 
     @Override
     public Optional<WorldProperties> getWorldProperties(UUID uniqueId) {
-        return null; //TODO: Implement
+        Optional<WorldProperties> loaded = WorldPropertyRegistryModule.getInstance().getWorldProperties(uniqueId);
+        if(!loaded.isPresent()) return loaded;
+
+        Path worlds = SpongeImpl.getWorldDirectory();
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(worlds)) {
+            for(Path world : stream) {
+                Path spongeFile = world.resolve("level_sponge.dat");
+                if(!Files.exists(spongeFile)) continue;
+                WorldProperties properties = new LanternWorldStorage(world).getWorldProperties();
+                if(properties.getUniqueId().equals(uniqueId)) return Optional.of(properties);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return Optional.empty();
     }
 
     @Override
@@ -391,7 +422,7 @@ public class LanternServer implements Server {
 
     @Override
     public ConsoleSource getConsole() {
-        return null; //TODO: Implement
+        return consoleManager.getSender();
     }
 
     @Override

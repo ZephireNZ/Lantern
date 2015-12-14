@@ -57,6 +57,7 @@ import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.weather.Weather;
+import org.spongepowered.lantern.world.storage.LanternChunkLayout;
 import org.spongepowered.lantern.world.storage.LanternWorldStorage;
 
 import java.util.Collection;
@@ -68,14 +69,14 @@ import java.util.function.Predicate;
 
 public class LanternWorld implements World {
 
-    private final WorldCreationSettings settings;
     private final WorldProperties properties;
     private final LanternWorldStorage storage;
+    private final ChunkManager chunkManager;
 
-    public LanternWorld(WorldCreationSettings settings, LanternWorldStorage storage, WorldProperties properties) {
-        this.settings = checkNotNull(settings);
+    public LanternWorld(LanternWorldStorage storage, WorldProperties properties) {
         this.storage = checkNotNull(storage);
         this.properties = checkNotNull(properties);
+        this.chunkManager = new ChunkManager(this);
     }
 
     /**
@@ -97,22 +98,37 @@ public class LanternWorld implements World {
 
     @Override
     public Optional<Chunk> getChunk(Vector3i position) {
-        return null; //TODO: Implement
+        return getChunk(position.getX(), position.getY(), position.getY());
     }
 
     @Override
     public Optional<Chunk> getChunk(int x, int y, int z) {
-        return null; //TODO: Implement
+        if (!LanternChunkLayout.instance.isValidChunk(x, y, z)) {
+            return Optional.empty();
+        }
+
+        if(chunkManager.isChunkLoaded(x, z)) {
+            return Optional.of(chunkManager.getChunk(x, z));
+        }
+        return Optional.empty();
     }
 
     @Override
     public Optional<Chunk> loadChunk(Vector3i position, boolean shouldGenerate) {
-        return null; //TODO: Implement
+        return loadChunk(position.getX(), position.getY(), position.getZ(), shouldGenerate);
     }
 
     @Override
     public Optional<Chunk> loadChunk(int x, int y, int z, boolean shouldGenerate) {
-        return null; //TODO: Implement
+        if (!LanternChunkLayout.instance.isValidChunk(x, y, z)) {
+            return Optional.empty();
+        }
+        if(chunkManager.isChunkLoaded(x, z)) return Optional.of(chunkManager.getChunk(x, z));
+
+        chunkManager.loadChunk(x, z, shouldGenerate);
+        if(chunkManager.isChunkLoaded(x, z)) return Optional.of(chunkManager.getChunk(x, z));
+
+        return Optional.empty();
     }
 
     @Override
@@ -187,7 +203,7 @@ public class LanternWorld implements World {
 
     @Override
     public WorldCreationSettings getCreationSettings() {
-        return this.settings;
+        return new LanternWorldCreationSettings(properties);
     }
 
     @Override
