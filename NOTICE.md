@@ -4,6 +4,6 @@
   - [Original license text](https://github.com/GlowstonePlusPlus/GlowstonePlusPlus/blob/master/LICENSE)
   - [Original sources](https://github.com/GlowstonePlusPlus/GlowstonePlusPlus)
 
-- Code in `org.spongepowered.lantern.plugin` contains modified version of [flow-plugins](https://github.com/flow/plugins)
-  - [Original license text][https://github.com/flow/plugins/blob/develop/LICENSE.txt]
-  - [Original sources](https://github.com/flow/plugins)
+- Portions of source code are also based off of [SpongeVanilla](http://github.com/SpongePowered/SpongeVanilla) and its children, licenced under [the MIT license](https://opensource.org/licenses/MIT)
+  - [Original license text](https://github.com/SpongePowered/SpongeVanilla/blob/master/LICENSE.txt)
+  - [Original sources](https://github.com/SpongePowered/SpongeVanilla)
