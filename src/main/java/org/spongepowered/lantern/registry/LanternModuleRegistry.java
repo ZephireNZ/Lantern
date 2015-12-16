@@ -30,11 +30,16 @@ import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.WorldBuilder;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.lantern.SpongeImpl;
+import org.spongepowered.lantern.registry.factory.TextFactoryModule;
 import org.spongepowered.lantern.registry.type.DifficultyRegistryModule;
 import org.spongepowered.lantern.registry.type.GameModeRegistryModule;
 import org.spongepowered.lantern.registry.type.GeneratorRegistryModule;
 import org.spongepowered.lantern.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.lantern.world.LanternWorldBuilder;
+
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LanternModuleRegistry {
 
@@ -50,7 +55,19 @@ public class LanternModuleRegistry {
     }
 
     private void registerFactories() {
-        //TODO: Implement
+        final List<FactoryRegistry<?, ?>> factoryRegistries = new ArrayList<>();
+        factoryRegistries.add(new TextFactoryModule());
+
+        try {
+            Field modifierField = Field.class.getDeclaredField("modifiers");
+            modifierField.setAccessible(true);
+            for (FactoryRegistry<?, ?> registry : factoryRegistries) {
+                RegistryHelper.setFactory(registry.getFactoryOwner(), registry.provideFactory());
+                registry.initialize();
+            }
+        } catch (Exception e) {
+            SpongeImpl.getLogger().error("Could not initialize a factory!", e);
+        }
     }
 
     private void registerDefaultSuppliers(LanternGameRegistry registry) {

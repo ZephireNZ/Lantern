@@ -57,11 +57,12 @@ public final class StatusRequestHandler implements MessageHandler<LanternSession
 
         DataContainer data = new MemoryDataContainer();
 
-        data.set(of("version.name"), "Lantern " + SpongeVersion.IMPLEMENTATION_VERSION);
-        data.set(of("version.protocol"), SpongeVersion.MINECRAFT_VERSION.getProtocol());
+        data.set(of("version", "name"), "Lantern " + SpongeVersion.IMPLEMENTATION_VERSION);
+        data.set(of("version", "protocol"), SpongeVersion.MINECRAFT_VERSION.getProtocol());
         event.getResponse().getPlayers().ifPresent(p -> {
-            data.set(of("players.max"), p.getMax());
-            data.set(of("players.online"), p.getProfiles());
+            data.set(of("players", "max"), p.getMax());
+            data.set(of("players", "online"), p.getProfiles().size());
+            data.set(of("players", "sample"), p.getProfiles());
         });
         data.set(of("description.text"), Texts.json().to(event.getResponse().getDescription()));
         event.getResponse().getFavicon().ifPresent(favicon -> {
@@ -71,7 +72,7 @@ public final class StatusRequestHandler implements MessageHandler<LanternSession
         ConfigurationNode node = ConfigurateTranslator.instance().translateData(data);
         StringWriter writer = new StringWriter();
         try {
-            GsonConfigurationLoader.builder().setSink(() -> new BufferedWriter(writer)).build().save(node);
+            GsonConfigurationLoader.builder().setIndent(0).setSink(() -> new BufferedWriter(writer)).build().save(node);
         } catch (IOException e) {
             // How?
             SpongeImpl.getLogger().error("Unable to send status!", e);
@@ -79,6 +80,6 @@ public final class StatusRequestHandler implements MessageHandler<LanternSession
         }
 
         // send it off
-        session.send(new StatusResponseMessage(writer.toString()));
+        session.send(new StatusResponseMessage(writer.toString().replaceAll("\n", "")));
     }
 }
