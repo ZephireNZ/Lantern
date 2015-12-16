@@ -86,7 +86,7 @@ public class DimensionRegistryModule implements ExtraClassCatalogRegistryModule<
     public void registerDefaults() {
         registerAdditionalCatalog(new LanternDimensionType("overworld", "Overworld", true, OverworldDimension.class));
         registerAdditionalCatalog(new LanternDimensionType("nether", "Nether", false, NetherDimension.class));
-        registerAdditionalCatalog(new LanternDimensionType("end", "The End", false, EndDimension.class));
+        registerAdditionalCatalog(new LanternDimensionType("the_end", "The End", false, EndDimension.class));
     }
 
     public void registerWorldUniqueId(UUID uuid, String folderName) {

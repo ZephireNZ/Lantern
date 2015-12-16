@@ -48,9 +48,11 @@ import org.spongepowered.lantern.plugin.LanternPluginManager;
 import org.spongepowered.lantern.registry.RegistryHelper;
 
 import java.io.IOException;
+import java.net.BindException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.logging.Level;
 
 public class Lantern implements PluginContainer {
 
@@ -77,7 +79,28 @@ public class Lantern implements PluginContainer {
 
         init();
 
-        SpongeImpl.getGame().setServer(new LanternServer());
+        try {
+            SpongeImpl.getGame().setServer(new LanternServer());
+        } catch (BindException e) {
+            SpongeImpl.getLogger().error("The server could not bind to the requested address.");
+            if (e.getMessage().startsWith("Cannot assign requested address")) {
+                SpongeImpl.getLogger().error("The 'server.ip' in your configuration may not be valid.");
+                SpongeImpl.getLogger().error("Unless you are sure you need it, try removing it.");
+                SpongeImpl.getLogger().error(e.toString());
+            } else if (e.getMessage().startsWith("Address already in use")) {
+                SpongeImpl.getLogger().error("The address was already in use. Check that no server is");
+                SpongeImpl.getLogger().error("already running on that port. If needed, try killing all");
+                SpongeImpl.getLogger().error("Java processes using Task Manager or similar.");
+                SpongeImpl.getLogger().error(e.toString());
+            } else {
+                SpongeImpl.getLogger().error("An unknown bind error has occurred.", e);
+            }
+            System.exit(1);
+        } catch (Throwable t) {
+            // general server startup crash
+            SpongeImpl.getLogger().error("Error during server startup.", t);
+            System.exit(1);
+        }
     }
 
     public void preInit() {

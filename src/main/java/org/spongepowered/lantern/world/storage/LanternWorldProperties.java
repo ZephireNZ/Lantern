@@ -66,6 +66,8 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
+
 public class LanternWorldProperties implements WorldProperties {
 
     public static final DataQuery LEVEL_DATA = of("Data");
@@ -153,6 +155,7 @@ public class LanternWorldProperties implements WorldProperties {
     private DataView spongeData;
     private DataView levelData;
 
+    @Nullable
     private LanternConfig.WorldConfig config;
 
     public LanternWorldProperties() {
@@ -384,6 +387,7 @@ public class LanternWorldProperties implements WorldProperties {
         return this.rootData;
     }
 
+    @Nullable
     public LanternConfig.WorldConfig getWorldConfig() {
         return config;
     }

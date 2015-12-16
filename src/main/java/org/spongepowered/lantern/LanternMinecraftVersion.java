@@ -24,16 +24,32 @@
  */
 package org.spongepowered.lantern;
 
+import com.google.common.collect.Maps;
 import org.spongepowered.api.MinecraftVersion;
+
+import java.util.Map;
 
 public class LanternMinecraftVersion implements MinecraftVersion {
 
     private final String name;
     private final int protocol;
 
+    private static final Map<Integer, LanternMinecraftVersion> cache = Maps.newIdentityHashMap();
+
+    private LanternMinecraftVersion(int protocol) {
+        this(Integer.toString(protocol), protocol);
+    }
+
     public LanternMinecraftVersion(String name, int protocol) {
         this.name = name;
         this.protocol = protocol;
+    }
+
+    public static LanternMinecraftVersion of(int protocol) {
+        if(!cache.containsKey(protocol)) {
+            cache.put(protocol, new LanternMinecraftVersion(protocol));
+        }
+        return cache.get(protocol);
     }
 
     @Override

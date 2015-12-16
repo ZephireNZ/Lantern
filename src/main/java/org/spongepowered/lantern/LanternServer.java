@@ -25,14 +25,18 @@
 package org.spongepowered.lantern;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.network.status.Favicon;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.world.ChunkTicketManager;
 import org.spongepowered.api.world.DimensionTypes;
@@ -43,15 +47,21 @@ import org.spongepowered.api.world.storage.ChunkLayout;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.lantern.config.LanternConfig;
 import org.spongepowered.lantern.launch.console.ConsoleManager;
+import org.spongepowered.lantern.network.LanternNetworkServer;
+import org.spongepowered.lantern.network.LanternSession;
+import org.spongepowered.lantern.network.SessionRegistry;
 import org.spongepowered.lantern.registry.type.world.WorldPropertyRegistryModule;
 import org.spongepowered.lantern.scheduler.LanternScheduler;
 import org.spongepowered.lantern.world.LanternWorld;
 import org.spongepowered.lantern.world.LanternWorldBuilder;
+import org.spongepowered.lantern.world.storage.LanternChunkLayout;
 import org.spongepowered.lantern.world.storage.LanternWorldProperties;
 import org.spongepowered.lantern.world.storage.LanternWorldStorage;
 
 import java.io.IOException;
+import java.net.BindException;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -66,16 +76,26 @@ public class LanternServer implements Server {
     public static final String THE_END_NAME = "DIM1";
 
     /**
+     * A list of all active {@link LanternSession}s.
+     */
+    private final SessionRegistry sessionRegistry = new SessionRegistry();
+
+    /**
      * The console manager of this server.
      */
     private final ConsoleManager consoleManager = new ConsoleManager();
+    /**
+     * The network server that manages the connection.
+     */
+    private final LanternNetworkServer networkServer = new LanternNetworkServer(this);
 
-    public LanternServer() {
+    public LanternServer() throws BindException {
         //TODO: Commandline Args?
         //TODO: Get Ops, whitelist, bans
 
         start();
         bind();
+        //TODO: Query and rcon
     }
 
     public void start() {
@@ -128,7 +148,7 @@ public class LanternServer implements Server {
         , SpongeImpl.getWorldDirectory());
         loadWorld(config.getLevelName(), SpongeImpl.getWorldDirectory());
 
-
+        //TODO: Check whether to load
         createWorld(new LanternWorldBuilder()
                 .name(NETHER_NAME)
                 .enabled(config.isAllowNether())
@@ -144,6 +164,7 @@ public class LanternServer implements Server {
         );
         loadWorld(NETHER_NAME);
 
+        //TODO: Check whether to load
         createWorld(new LanternWorldBuilder()
                 .name(THE_END_NAME)
                 .enabled(config.isAllowEnd())
@@ -160,13 +181,37 @@ public class LanternServer implements Server {
         loadWorld(THE_END_NAME);
     }
 
-    public void bind() {
-        //TODO: Implement
+    public void bind() throws BindException {
+        SocketAddress address = getBindAddress();
+
+        SpongeImpl.getLogger().info("Binding to address: " + address + "...");
+        ChannelFuture future = networkServer.bind(address);
+        Channel channel = future.awaitUninterruptibly().channel();
+        if (!channel.isActive()) {
+            Throwable cause = future.cause();
+            if (cause instanceof BindException) {
+                throw (BindException) cause;
+            }
+            throw new RuntimeException("Failed to bind to address", cause);
+        }
+
+        SpongeImpl.getLogger().info("Successfully bound to: " + channel.localAddress());
+    }
+
+    private SocketAddress getBindAddress() {
+        String ip = SpongeImpl.getGlobalConfig().getConfig().getServerIp();
+        int port = SpongeImpl.getGlobalConfig().getConfig().getServerPort();
+
+        if(ip.length() == 0) {
+            return new InetSocketAddress(port);
+        }
+
+        return new InetSocketAddress(ip, port);
     }
 
     @Override
     public Collection<Player> getOnlinePlayers() {
-        return null; //TODO: Implement
+        return Collections.emptySet(); //TODO: Implement
     }
 
     @Override
@@ -191,12 +236,12 @@ public class LanternServer implements Server {
 
     @Override
     public Collection<WorldProperties> getUnloadedWorlds() {
-        return null; //TODO: Implement
+        return Collections.emptySet(); //TODO: Implement
     }
 
     @Override
     public Collection<WorldProperties> getAllWorldProperties() {
-        return null; //TODO: Implement
+        return Collections.emptySet(); //TODO: Implement
     }
 
     @Override
@@ -250,6 +295,9 @@ public class LanternServer implements Server {
         LanternWorldStorage storage = new LanternWorldStorage(worldFolder);
         Optional<WorldProperties> optProps = WorldPropertyRegistryModule.getInstance().getWorldProperties(worldName);
         WorldProperties properties = optProps.orElse(storage.getWorldProperties());
+        if(properties instanceof LanternWorldProperties && ((LanternWorldProperties) properties).getWorldConfig() == null) {
+            ((LanternWorldProperties) properties).setWorldConfig(SpongeImpl.getWorldConfig(worldName, properties.getDimensionType()).getConfig());
+        }
 
         if(!properties.isEnabled()) {
             SpongeImpl.getLogger().error("Unable to load world " + worldName + ". World is disabled!");
@@ -261,8 +309,6 @@ public class LanternServer implements Server {
         if(!WorldPropertyRegistryModule.getInstance().isWorldRegistered(worldName)) {
             WorldPropertyRegistryModule.getInstance().registerWorldProperties(properties);
         }
-
-        WorldCreationSettings settings = new LanternWorldBuilder(properties).buildSettings();
 
         LanternWorld world = new LanternWorld(storage, properties);
         LanternScheduler.getInstance().getWorldScheduler().addWorld(world);
@@ -379,7 +425,7 @@ public class LanternServer implements Server {
 
     @Override
     public ChunkLayout getChunkLayout() {
-        return null; //TODO: Implement
+        return LanternChunkLayout.instance;
     }
 
     @Override
@@ -414,7 +460,7 @@ public class LanternServer implements Server {
 
     @Override
     public Text getMotd() {
-        return null; //TODO: Implement
+        return Texts.of(); //TODO: Implement
     }
 
     @Override
@@ -450,5 +496,17 @@ public class LanternServer implements Server {
     @Override
     public GameProfileManager getGameProfileManager() {
         return null; //TODO: Implement
+    }
+
+    public SessionRegistry getSessionRegistry() {
+        return sessionRegistry;
+    }
+
+    public boolean getProxySupport() {
+        return SpongeImpl.getGlobalConfig().getConfig().getBungeeCord().getIpForwarding();
+    }
+
+    public Optional<Favicon> getFavicon() {
+        return Optional.empty(); //TODO: Implement
     }
 }

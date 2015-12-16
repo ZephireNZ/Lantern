@@ -53,7 +53,7 @@ public class LanternWorldStorage implements WorldStorage {
     public LanternWorldStorage(Path world) {
         this.worldDir = world;
         this.regions = new RegionFileCache(world, ".mca");
-        this.executor = MoreExecutors.listeningDecorator(LanternScheduler.getInstance().createAsyncExecutor(SpongeImpl.getInstance()));
+        this.executor = MoreExecutors.listeningDecorator(LanternScheduler.getInstance().createAsyncExecutor(SpongeImpl.getPlugin()));
     }
 
     @Override
@@ -94,7 +94,7 @@ public class LanternWorldStorage implements WorldStorage {
     }
 
     @Override
-    public WorldProperties getWorldProperties() {
+    public LanternWorldProperties getWorldProperties() {
         LanternWorldProperties properties = new LanternWorldProperties();
 
         Path levelFile = worldDir.resolve("level.dat");
