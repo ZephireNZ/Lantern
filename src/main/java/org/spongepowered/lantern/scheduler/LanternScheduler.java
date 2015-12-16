@@ -68,7 +68,8 @@ public class LanternScheduler implements Scheduler {
 
     @Nullable
     private static LanternScheduler instance;
-    public static final int TICK_DURATION = 50;
+    public static final int TICK_DURATION_MS = 50;
+    public static final long TICK_DURATION_NS = TimeUnit.NANOSECONDS.convert(TICK_DURATION_MS, TimeUnit.MILLISECONDS);
 
     private final ScheduledExecutorService tickExecutor = Executors.newSingleThreadScheduledExecutor(LanternThreadFactory.INSTANCE);
 
@@ -94,7 +95,7 @@ public class LanternScheduler implements Scheduler {
             } catch (Exception ex) {
                 SpongeImpl.getLogger().error("Error while pulsing", ex);
             }
-        }, 0, TICK_DURATION, TimeUnit.MILLISECONDS);
+        }, 0, TICK_DURATION_MS, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -172,7 +173,7 @@ public class LanternScheduler implements Scheduler {
 
     @Override
     public int getPreferredTickInterval() {
-        return TICK_DURATION;
+        return TICK_DURATION_MS;
     }
 
     /**
@@ -220,21 +221,17 @@ public class LanternScheduler implements Scheduler {
         this.syncScheduler.tick();
     }
 
-    public ExecutorService getAsyncExecutor() {
-        return this.asyncScheduler.getExecutor();
-    }
-
     public WorldScheduler getWorldScheduler() {
         return worldScheduler;
     }
 
     @Override
     public SpongeExecutorService createSyncExecutor(Object plugin) {
-        return null; //TODO: Implement
+        return new TaskExecutorService(this::createTaskBuilder, this.syncScheduler, checkPluginInstance(plugin));
     }
 
     @Override
     public SpongeExecutorService createAsyncExecutor(Object plugin) {
-        return null; //TODO: Implement
+        return new TaskExecutorService(() -> createTaskBuilder().async(), this.asyncScheduler, checkPluginInstance(plugin));
     }
 }
