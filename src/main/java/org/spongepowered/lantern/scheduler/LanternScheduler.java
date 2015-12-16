@@ -30,6 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.Sets;
 import com.google.inject.Singleton;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.scheduler.SpongeExecutorService;
 import org.spongepowered.lantern.SpongeImpl;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
@@ -225,5 +226,15 @@ public class LanternScheduler implements Scheduler {
 
     public WorldScheduler getWorldScheduler() {
         return worldScheduler;
+    }
+
+    @Override
+    public SpongeExecutorService createSyncExecutor(Object plugin) {
+        return null; //TODO: Implement
+    }
+
+    @Override
+    public SpongeExecutorService createAsyncExecutor(Object plugin) {
+        return null; //TODO: Implement
     }
 }

@@ -51,17 +51,18 @@ public class LanternWorldCreationSettings implements WorldCreationSettings {
     private boolean bonusChest = false; // TODO
     private DimensionType dimension;
     private DataContainer generatorSettings;
+    private boolean pvp;
 
     public LanternWorldCreationSettings(WorldProperties props) {
         this(props.getWorldName(), props.isEnabled(), props.loadOnStartup(), props.doesKeepSpawnLoaded(),
                 props.getSeed(), props.getGameMode(), props.getGeneratorType(), props.getGeneratorModifiers(),
-                props.usesMapFeatures(), props.isHardcore(), props.getDimensionType(), props.getGeneratorSettings());
+                props.usesMapFeatures(), props.isHardcore(), props.getDimensionType(), props.getGeneratorSettings(), props.isPVPEnabled());
     }
 
     // One hell of a ctor...
     public LanternWorldCreationSettings(String name, boolean enabled, boolean loadOnStartup, boolean keepSpawnLoaded,
                                         long seed, GameMode gamemode, GeneratorType generator, Collection<WorldGeneratorModifier> modifiers,
-                                        boolean mapFeatures, boolean hardcore, DimensionType dimension, DataContainer generatorSettings) {
+                                        boolean mapFeatures, boolean hardcore, DimensionType dimension, DataContainer generatorSettings, boolean pvp) {
         this.name = name;
         this.enabled = enabled;
         this.loadOnStartup = loadOnStartup;
@@ -74,6 +75,7 @@ public class LanternWorldCreationSettings implements WorldCreationSettings {
         this.hardcore = hardcore;
         this.dimension = dimension;
         this.generatorSettings = generatorSettings;
+        this.pvp = pvp;
     }
 
     @Override
@@ -144,5 +146,10 @@ public class LanternWorldCreationSettings implements WorldCreationSettings {
     @Override
     public DataContainer getGeneratorSettings() {
         return this.generatorSettings;
+    }
+
+    @Override
+    public boolean isPVPEnabled() {
+        return this.pvp;
     }
 }

@@ -73,7 +73,7 @@ public class EndDimension implements Dimension {
 
     @Override
     public DimensionType getType() {
-        return DimensionTypes.END;
+        return DimensionTypes.THE_END;
     }
 
     @Override
@@ -88,7 +88,7 @@ public class EndDimension implements Dimension {
 
     @Override
     public GeneratorType getGeneratorType() {
-        return GeneratorTypes.END;
+        return GeneratorTypes.THE_END;
     }
 
     @Override

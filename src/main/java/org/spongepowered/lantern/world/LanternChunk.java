@@ -1016,4 +1016,19 @@ public class LanternChunk implements Chunk {
     public Collection<Direction> getFacesWithProperty(int x, int y, int z, Class<? extends Property<?, ?>> propertyClass) {
         return null; //TODO: Implement
     }
+
+    @Override
+    public int getInhabittedTime() {
+        return 0; //TODO: Implement
+    }
+
+    @Override
+    public double getRegionalDifficultyFactor() {
+        return 0; //TODO: Implement
+    }
+
+    @Override
+    public double getRegionalDifficultyPercentage() {
+        return 0; //TODO: Implement
+    }
 }

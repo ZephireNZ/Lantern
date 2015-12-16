@@ -134,7 +134,7 @@ public class LanternGeneratorTypes {
 
         @Override
         public String getId() {
-            return "end";
+            return "the_end";
         }
 
         @Override

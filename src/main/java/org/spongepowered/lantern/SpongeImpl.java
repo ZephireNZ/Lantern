@@ -38,6 +38,8 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.ProviderExistsException;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.lantern.config.LanternConfig;
+import org.spongepowered.lantern.config.LanternConfig.DimensionConfig;
+import org.spongepowered.lantern.config.LanternConfig.WorldConfig;
 import org.spongepowered.lantern.registry.LanternGameRegistry;
 
 import java.nio.file.Path;
@@ -62,7 +64,7 @@ public class SpongeImpl {
     private static final Path modConfigDir = configDir.resolve(CONFIG_NAME); // We want to preserve configs
     private static final Path worldDirectory = gameDir.resolve(getGlobalConfig().getConfig().getLevelName());
 
-    private static final Map<String, LanternConfig<LanternConfig.WorldConfig>> configs = Maps.newHashMap();
+    private static final Map<String, LanternConfig<WorldConfig>> configs = Maps.newHashMap();
 
     @Nullable
     private static SpongeImpl instance;
@@ -160,12 +162,27 @@ public class SpongeImpl {
         return globalConfig;
     }
 
-    public static LanternConfig<LanternConfig.WorldConfig> getWorldConfig(String world, DimensionType dimension) {
+    public static LanternConfig<WorldConfig> getWorldConfig(String world, DimensionType dimension) {
         if(configs.get(world) != null) {
             return configs.get(world);
         }
 
         String dimensionName = dimension.getName().toLowerCase().replace(" ", "_").replace("[^A-Za-z0-9_]", "");
         return new LanternConfig<>(LanternConfig.Type.WORLD, modConfigDir.resolve("worlds").resolve(dimensionName).resolve(world).resolve("world.conf"), CONFIG_NAME);
+    }
+
+    public static LanternConfig<?> getActiveConfig(String dimFolder, String worldFolder) {
+        Path configPath = SpongeImpl.getConfigDirectory().resolve("worlds").resolve(dimFolder).resolve(worldFolder).resolve("world.conf");
+        Path configPath2 = SpongeImpl.getConfigDirectory().resolve("worlds").resolve(dimFolder).resolve("dimension.conf");
+        LanternConfig<WorldConfig> worldConfig = new LanternConfig<>(LanternConfig.Type.WORLD, configPath, SpongeImpl.ECOSYSTEM_ID);
+        LanternConfig<DimensionConfig> dimConfig = new LanternConfig<>(LanternConfig.Type.DIMENSION, configPath2, SpongeImpl.ECOSYSTEM_ID);
+        if (worldConfig != null && dimConfig != null) {
+            if (worldConfig.getConfig().isConfigEnabled()) {
+                return worldConfig;
+            } else if (dimConfig.getConfig().isConfigEnabled()) {
+                return dimConfig;
+            }
+        }
+        return SpongeImpl.getGlobalConfig();
     }
 }

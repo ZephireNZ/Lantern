@@ -61,6 +61,7 @@ public class LanternWorldBuilder implements WorldBuilder {
     private boolean keepSpawnLoaded;
     private DataContainer generatorSettings;
     private ImmutableList<WorldGeneratorModifier> generatorModifiers;
+    private boolean pvp;
 
     public LanternWorldBuilder() {
         reset();
@@ -87,6 +88,7 @@ public class LanternWorldBuilder implements WorldBuilder {
         this.worldEnabled = settings.isEnabled();
         this.loadOnStartup = settings.loadOnStartup();
         this.keepSpawnLoaded = settings.doesKeepSpawnLoaded();
+        this.pvp = settings.isPVPEnabled();
         return this;
     }
 
@@ -103,6 +105,7 @@ public class LanternWorldBuilder implements WorldBuilder {
         this.worldEnabled = properties.isEnabled();
         this.loadOnStartup = properties.loadOnStartup();
         this.keepSpawnLoaded = properties.doesKeepSpawnLoaded();
+        this.pvp = properties.isPVPEnabled();
         return this;
     }
 
@@ -187,6 +190,12 @@ public class LanternWorldBuilder implements WorldBuilder {
     }
 
     @Override
+    public WorldBuilder pvp(boolean enabled) {
+        this.pvp = enabled;
+        return this;
+    }
+
+    @Override
     public Optional<World> build() throws IllegalStateException {
         final WorldCreationSettings settings = buildSettings();
         SpongeImpl.getGame().getServer().createWorld(settings);
@@ -196,7 +205,7 @@ public class LanternWorldBuilder implements WorldBuilder {
     @Override
     public WorldCreationSettings buildSettings() throws IllegalStateException {
         return new LanternWorldCreationSettings(this.name, this.worldEnabled, this.loadOnStartup, this.keepSpawnLoaded, this.seed,
-                this.gameMode, this.generatorType, this.generatorModifiers, this.mapFeaturesEnabled, this.hardcore, this.dimensionType, this.generatorSettings);
+                this.gameMode, this.generatorType, this.generatorModifiers, this.mapFeaturesEnabled, this.hardcore, this.dimensionType, this.generatorSettings, this.pvp);
     }
 
     @Override
@@ -213,6 +222,7 @@ public class LanternWorldBuilder implements WorldBuilder {
         this.keepSpawnLoaded = false;
         this.generatorSettings = new MemoryDataContainer();
         this.generatorModifiers = ImmutableList.of();
+        this.pvp = true;
         return this;
     }
 }

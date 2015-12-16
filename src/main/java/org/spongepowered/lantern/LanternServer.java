@@ -108,9 +108,9 @@ public class LanternServer implements Server {
         }
 
         LanternConfig.GlobalConfig config = SpongeImpl.getGlobalConfig().getConfig();
-        LanternConfig.WorldConfig worldConfig = SpongeImpl.getWorldConfig(config.getLevelName(), DimensionTypes.OVERWORLD).getConfig();
-        LanternConfig.WorldConfig netherConfig = SpongeImpl.getWorldConfig(NETHER_NAME, DimensionTypes.NETHER).getConfig();
-        LanternConfig.WorldConfig endConfig = SpongeImpl.getWorldConfig(THE_END_NAME, DimensionTypes.END).getConfig();
+        LanternConfig.ConfigBase worldConfig = SpongeImpl.getActiveConfig(DimensionTypes.OVERWORLD.getId(), config.getLevelName()).getConfig();
+        LanternConfig.ConfigBase netherConfig = SpongeImpl.getActiveConfig(DimensionTypes.NETHER.getId(), NETHER_NAME).getConfig();
+        LanternConfig.ConfigBase endConfig = SpongeImpl.getActiveConfig(DimensionTypes.THE_END.getId(), THE_END_NAME).getConfig();
 
         // Load the default worlds if they aren't loaded already
         createWorld(new LanternWorldBuilder()
@@ -151,8 +151,8 @@ public class LanternServer implements Server {
                 .keepsSpawnLoaded(false)
                 .seed(config.getLevelSeed())
                 .gameMode(config.getGamemode())
-                .generator(GeneratorTypes.END)
-                .dimensionType(DimensionTypes.END)
+                .generator(GeneratorTypes.THE_END)
+                .dimensionType(DimensionTypes.THE_END)
                 .hardcore(endConfig.getWorld().isHardcore())
 //                .generatorSettings(endConfig.getWorld().getGeneratorSettings()) //TODO: Generator Settings
                 .buildSettings()
@@ -332,8 +332,15 @@ public class LanternServer implements Server {
         Optional<World> existing = getWorld(name);
         if(existing.isPresent()) return Optional.of(existing.get().getProperties());
 
+        LanternConfig.WorldConfig config = SpongeImpl.getWorldConfig(settings.getWorldName(), settings.getDimensionType()).getConfig();
         LanternWorldStorage storage = new LanternWorldStorage(worldDir);
         LanternWorldProperties properties = new LanternWorldProperties(settings);
+        properties.setWorldConfig(config);
+        // Ensure these are set on the config
+        properties.setEnabled(settings.isEnabled());
+        properties.setLoadOnStartup(settings.loadOnStartup());
+        properties.setPVPEnabled(settings.isPVPEnabled());
+
         try {
             storage.writeWorldProperties(properties);
         } catch (IOException e) {

@@ -52,6 +52,7 @@ import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.lantern.SpongeImpl;
+import org.spongepowered.lantern.config.LanternConfig;
 import org.spongepowered.lantern.entity.living.player.LanternGameMode;
 import org.spongepowered.lantern.world.difficulty.LanternDifficulty;
 
@@ -86,9 +87,6 @@ public class LanternWorldProperties implements WorldProperties {
     public static final DataQuery LAST_PLAYED = of("LastPlayed");
     public static final DataQuery DIMENSION_ID = of("dimensionId");
     public static final DataQuery DIMENSION_TYPE = of("dimensionType");
-    public static final DataQuery WORLD_ENABLED = of("enabled");
-    public static final DataQuery KEEP_SPAWN_LOADED = of("keepSpawnLoaded");
-    public static final DataQuery LOAD_ON_STARTUP = of("loadOnStartup");
     public static final DataQuery GENERATOR_MODIFIERS = of("generatorModifiers");
     public static final DataQuery GENERATOR_NAME = of("generatorName");
     public static final DataQuery GENERATOR_OPTIONS = of("generatorOptions");
@@ -107,12 +105,10 @@ public class LanternWorldProperties implements WorldProperties {
     public static final DataQuery BORDER_WARNING_DISTANCE = of("BorderWarningBlocks");
     public static final DataQuery BORDER_WARNING_TIME = of("BorderWarningTime");
     public static final DataQuery DIFFICULTY = of("Difficulty");
+
     // Sponge fields
     private UUID uuid;
-    private boolean enabled;
     private DimensionType dimensionType;
-    private boolean loadOnStartup;
-    private boolean keepSpawnLoaded;
     private Collection<WorldGeneratorModifier> modifiers;
 
     // Vanilla fields
@@ -157,12 +153,11 @@ public class LanternWorldProperties implements WorldProperties {
     private DataView spongeData;
     private DataView levelData;
 
+    private LanternConfig.WorldConfig config;
+
     public LanternWorldProperties() {
         this.uuid = UUID.randomUUID();
-        this.enabled = true;
         this.dimensionType = DimensionTypes.OVERWORLD;
-        this.loadOnStartup = true;
-        this.keepSpawnLoaded = true;
         this.modifiers = Lists.newArrayList();
         this.name = "world-" + uuid.toString();
         this.generator = GeneratorTypes.DEFAULT;
@@ -203,9 +198,6 @@ public class LanternWorldProperties implements WorldProperties {
     public LanternWorldProperties(WorldCreationSettings settings) {
         this();
         this.name = settings.getWorldName();
-        this.enabled = settings.isEnabled();
-        this.loadOnStartup = settings.loadOnStartup();
-        this.keepSpawnLoaded = settings.doesKeepSpawnLoaded();
         this.seed = settings.getSeed();
         this.gamemode = settings.getGameMode();
         this.generator = settings.getGeneratorType();
@@ -224,9 +216,6 @@ public class LanternWorldProperties implements WorldProperties {
         this.spongeData.set(DIMENSION_TYPE, this.dimensionType.getDimensionClass().getName());
         this.spongeData.set(SPONGE_UUID_MOST, this.uuid.getMostSignificantBits());
         this.spongeData.set(SPONGE_UUID_LEAST, this.uuid.getLeastSignificantBits());
-        this.spongeData.set(WORLD_ENABLED, this.enabled);
-        this.spongeData.set(KEEP_SPAWN_LOADED, this.keepSpawnLoaded);
-        this.spongeData.set(LOAD_ON_STARTUP, this.loadOnStartup);
 
         List<String> modifierIds = this.modifiers.stream().map(WorldGeneratorModifier::getId).collect(Collectors.toList());
         this.spongeData.set(GENERATOR_MODIFIERS, modifierIds);
@@ -290,9 +279,6 @@ public class LanternWorldProperties implements WorldProperties {
         if(sponge.contains(SPONGE_UUID_LEAST, SPONGE_UUID_MOST)) {
             this.uuid = new UUID(sponge.getLong(SPONGE_UUID_MOST).get(), sponge.getLong(SPONGE_UUID_LEAST).get());
         }
-        this.enabled = sponge.getBoolean(WORLD_ENABLED).orElse(this.enabled);
-        this.keepSpawnLoaded = sponge.getBoolean(KEEP_SPAWN_LOADED).orElse(this.keepSpawnLoaded);
-        this.loadOnStartup = sponge.getBoolean(LOAD_ON_STARTUP).orElse(this.loadOnStartup);
         if(sponge.contains(GENERATOR_MODIFIERS)) {
 //            this.modifiers = sponge.getString(GENERATOR_MODIFIERS).get(); TODO: Pending registry
         }
@@ -398,34 +384,42 @@ public class LanternWorldProperties implements WorldProperties {
         return this.rootData;
     }
 
+    public LanternConfig.WorldConfig getWorldConfig() {
+        return config;
+    }
+
+    public void setWorldConfig(LanternConfig.WorldConfig config) {
+        this.config = config;
+    }
+
     @Override
     public boolean isEnabled() {
-        return this.enabled;
+        return this.config.getWorld().isWorldEnabled();
     }
 
     @Override
     public void setEnabled(boolean state) {
-        this.enabled = state;
+        this.config.getWorld().setWorldEnabled(state);
     }
 
     @Override
     public boolean loadOnStartup() {
-        return this.loadOnStartup;
+        return this.config.getWorld().loadOnStartup();
     }
 
     @Override
     public void setLoadOnStartup(boolean state) {
-        this.loadOnStartup = state;
+        this.config.getWorld().setLoadOnStartup(state);
     }
 
     @Override
     public boolean doesKeepSpawnLoaded() {
-        return this.keepSpawnLoaded;
+        return this.config.getWorld().getKeepSpawnLoaded();
     }
 
     @Override
     public void setKeepSpawnLoaded(boolean state) {
-        this.keepSpawnLoaded = state;
+        this.config.getWorld().setKeepSpawnLoaded(state);
     }
 
     @Override
@@ -703,6 +697,16 @@ public class LanternWorldProperties implements WorldProperties {
     @Override
     public DataContainer getGeneratorSettings() {
         return this.generatorSettings;
+    }
+
+    @Override
+    public boolean isPVPEnabled() {
+        return this.config.getWorld().getPVPEnabled();
+    }
+
+    @Override
+    public void setPVPEnabled(boolean enabled) {
+        this.config.getWorld().setPVPEnabled(enabled);
     }
 
     @Override

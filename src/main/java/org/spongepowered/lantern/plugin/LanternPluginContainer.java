@@ -24,6 +24,7 @@
  */
 package org.spongepowered.lantern.plugin;
 
+import com.google.inject.Injector;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.lantern.SpongeImpl;
 import org.spongepowered.lantern.guice.LanternPluginGuiceModule;
@@ -36,6 +37,7 @@ public class LanternPluginContainer extends AbstractPluginContainer {
     private final String name;
     private final String version;
     private final Optional<Object> instance;
+    private final Injector injector;
 
     public LanternPluginContainer(Class<?> pluginClass) {
         Plugin info = pluginClass.getAnnotation(Plugin.class);
@@ -43,7 +45,8 @@ public class LanternPluginContainer extends AbstractPluginContainer {
         this.name = info.name();
         this.version = info.version();
 
-        this.instance = Optional.of(SpongeImpl.getInjector().createChildInjector(new LanternPluginGuiceModule(this, pluginClass)).getInstance(pluginClass));
+        this.injector = SpongeImpl.getInjector().createChildInjector(new LanternPluginGuiceModule(this, pluginClass));
+        this.instance = Optional.of(this.injector.getInstance(pluginClass));
     }
 
     @Override
@@ -64,5 +67,9 @@ public class LanternPluginContainer extends AbstractPluginContainer {
     @Override
     public Optional<Object> getInstance() {
         return this.instance;
+    }
+
+    public Injector getInjector() {
+        return this.injector;
     }
 }
